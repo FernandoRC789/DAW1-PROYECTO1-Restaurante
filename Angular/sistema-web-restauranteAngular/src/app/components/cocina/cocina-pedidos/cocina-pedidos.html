@@ -1,0 +1,53 @@
+<div class="container mt-3">
+
+  <h3>👨‍🍳 Pedidos Cocina</h3>
+
+<select class="form-select"
+        [(ngModel)]="filtroEstado"
+        (change)="aplicarFiltro()">
+
+  <option value="TODOS">Todos</option>
+  <option value="PENDIENTE">Pendiente</option>
+  <option value="EN PROCESO">En proceso</option>
+  <option value="LISTO">Listo</option>
+
+</select>
+<br>
+
+  <div *ngFor="let p of pedidos" class="card mb-3 p-3">
+
+  <h5>🍽️ Mesa {{ p.mesa?.numero }}</h5>
+
+  <span class="badge bg-primary">
+    {{ p.estado?.nombre }}
+  </span>
+
+  <hr>
+
+  <h6>🧾 Pedido:</h6>
+
+  <ul>
+    <li *ngFor="let d of p.detallePedido">
+      {{ d.comida.nombre }} x {{ d.cantidad }}
+    </li>
+  </ul>
+
+  <div class="mt-2">
+<button class="btn btn-warning btn-sm"
+        [disabled]="p.estado?.nombre !== 'PENDIENTE'"
+        (click)="cambiarEstadoPedido(p.idPedido, 2)">
+  🔥 En preparación
+</button>
+
+<button class="btn btn-success btn-sm"
+        [disabled]="p.estado?.nombre !== 'EN PROCESO'"
+        (click)="cambiarEstadoPedido(p.idPedido, 3)">
+  ✔ Listo
+</button>
+
+  </div>
+</div>
+<div class="mt-2 text-end">
+
+</div>
+</div>

@@ -1,0 +1,103 @@
+<div class="container mt-3">
+
+  <h3>🍽️ Estado de Comidas</h3>
+
+  <!-- 🔎 BUSCADOR -->
+<div class="position-relative mb-3">
+
+  <input
+    type="text"
+    class="form-control pe-5"
+    placeholder="🔎 Buscar comida..."
+    [(ngModel)]="textoBusqueda"
+    (input)="aplicarFiltro()"
+    (keydown.enter)="aplicarFiltro()"
+  />
+
+  <!-- ❌ botón limpiar -->
+  <button
+    *ngIf="textoBusqueda"
+    type="button"
+    class="btn btn-sm btn-light position-absolute top-50 end-0 translate-middle-y me-2"
+    (click)="limpiarBusqueda()">
+
+    ✖
+  </button>
+
+</div>
+
+  <!-- 🎯 FILTRO -->
+  <select class="form-select mb-3"
+          [(ngModel)]="filtroDisponibilidad"
+          (change)="aplicarFiltro()">
+
+    <option value="TODOS">Todos</option>
+    <option value="DISPONIBLE">Disponibles</option>
+    <option value="NO_DISPONIBLE">No disponibles</option>
+
+  </select>
+
+  <table class="table table-bordered">
+
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Estado</th>
+        <th>Acción</th> <!-- 🔥 nuevo -->
+      </tr>
+    </thead>
+
+    <tbody>
+
+      <tr *ngFor="let c of comidasPaginadas">
+
+        <td>{{ c.nombre }}</td>
+
+        <!-- 🟢 estado visual -->
+        <td>
+          <span class="badge"
+                [ngClass]="c.disponible ? 'bg-success' : 'bg-danger'">
+
+            {{ c.disponible ? 'Disponible' : 'No disponible' }}
+
+          </span>
+        </td>
+
+        <!-- 🔥 BOTÓN DE CAMBIO -->
+        <td>
+
+  <button class="btn btn-sm"
+          [ngClass]="c.disponible ? 'btn-outline-danger' : 'btn-outline-success'"
+          (click)="cambiarEstadoComida(c)">
+
+    🔄 Cambiar estado
+
+  </button>
+
+        </td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
+
+  <div class="d-flex justify-content-between mt-3">
+
+  <button class="btn btn-secondary btn-sm"
+          (click)="cambiarPagina(paginaActual - 1)"
+          [disabled]="paginaActual === 1">
+    ⬅ Anterior
+  </button>
+
+  <span>Página {{ paginaActual }}</span>
+
+  <button class="btn btn-secondary btn-sm"
+          (click)="cambiarPagina(paginaActual + 1)"
+          [disabled]="paginaActual * tamanoPagina >= comidas.length">
+    Siguiente ➡
+  </button>
+
+</div>
+
+</div>

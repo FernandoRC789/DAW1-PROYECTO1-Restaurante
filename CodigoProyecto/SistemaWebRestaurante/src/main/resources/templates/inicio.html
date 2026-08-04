@@ -1,0 +1,147 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+	<meta charset="UTF-8">
+	<title>Inicio</title>
+
+	<style>
+		body {
+			margin: 0;
+			font-family: 'Segoe UI', sans-serif;
+			background: linear-gradient(135deg, #020617, #0f172a);
+			color: white;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100vh;
+		}
+
+		.container {
+			background: rgba(30, 41, 59, 0.85);
+			backdrop-filter: blur(12px);
+			padding: 45px;
+			border-radius: 20px;
+			width: 420px;
+			box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+			text-align: center;
+			animation: fadeIn 0.6s ease-in-out;
+		}
+
+		h1 {
+			margin-bottom: 10px;
+			font-size: 26px;
+			color: #3b82f6;
+		}
+
+		.subtitle {
+			font-size: 14px;
+			opacity: 0.7;
+			margin-bottom: 25px;
+		}
+
+		p {
+			margin: 10px 0;
+			font-size: 15px;
+		}
+
+		span {
+			font-weight: bold;
+			color: #22c55e;
+		}
+
+		.section {
+			margin-top: 20px;
+			padding: 15px;
+			border-radius: 10px;
+			background: rgba(255,255,255,0.03);
+		}
+
+		a {
+			display: block;
+			margin: 12px 0;
+			padding: 12px;
+			text-decoration: none;
+			border-radius: 10px;
+			font-weight: bold;
+			transition: all 0.3s ease;
+			box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+		}
+
+		a:hover {
+			transform: translateY(-2px) scale(1.02);
+		}
+
+		a[href*="admin"] {
+			background: linear-gradient(135deg, #ef4444, #dc2626);
+			color: white;
+		}
+
+		a[href*="pedidos"] {
+			background: linear-gradient(135deg, #2563eb, #1d4ed8);
+			color: white;
+		}
+
+		.info-text {
+			font-size: 13px;
+			opacity: 0.7;
+		}
+
+		button {
+			margin-top: 25px;
+			width: 100%;
+			padding: 12px;
+			background: linear-gradient(135deg, #f59e0b, #d97706);
+			border: none;
+			border-radius: 10px;
+			color: black;
+			font-weight: bold;
+			cursor: pointer;
+			transition: 0.3s;
+			box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+		}
+
+		button:hover {
+			transform: scale(1.03);
+		}
+
+		@keyframes fadeIn {
+			from {
+				opacity: 0;
+				transform: translateY(25px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+	</style>
+</head>
+
+<body>
+
+	<div class="container">
+		<h1>Panel Principal</h1>
+		<p class="subtitle">Sistema de gestión de pedidos tecnológicos</p>
+
+		<div>
+			<p>Bienvenido, <span sec:authentication="name"></span> 👋</p>
+
+			<div sec:authorize="hasRole('ADMIN')" class="section">
+				<p class="info-text">Acceso administrativo</p>
+				<a th:href="@{/admin}">⚙ Ir al panel de administración</a>
+			</div>
+
+			<div sec:authorize="hasRole('MESERO')" class="section">
+				<p class="info-text">Zona de usuario</p>
+				<p>Contenido exclusivo para usuarios normales.</p>
+				<a th:href="@{/pedidos}">📦 Ir a mis Pedidos</a>
+			</div>
+
+			<form th:action="@{/logout}" method="post">
+				<button type="submit">Cerrar sesión</button>
+			</form>
+		</div>
+	</div>
+
+	
+</body>
+</html>

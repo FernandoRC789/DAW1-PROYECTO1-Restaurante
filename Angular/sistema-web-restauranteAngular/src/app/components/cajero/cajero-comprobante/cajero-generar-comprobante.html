@@ -1,0 +1,117 @@
+<div class="container mt-3">
+
+  <h3>💳 Cajero - Generar Comprobante</h3>
+
+  <div class="row">
+<div *ngIf="loadingPedidos">Cargando pedidos...</div>
+    <!-- 📦 LISTA DE PEDIDOS -->
+    <div class="col-md-6">
+
+      <h5>📦 Pedidos Listos</h5>
+
+      <div *ngFor="let p of pedidos"
+           class="card mb-2 p-2"
+           (click)="seleccionarPedido(p)"
+           style="cursor:pointer"
+           [class.border-primary]="pedidoSeleccionado?.idPedido === p.idPedido">
+
+        <strong>🧾 Mesa {{ p.mesa?.numero }}</strong>
+
+        <div>Total: S/ {{ getTotal(p) }}</div>
+
+      </div>
+
+    </div>
+
+    <!-- 💳 PANEL DE COBRO -->
+    <div class="col-md-6">
+
+      <h5>💳 Cobro</h5>
+
+      <div *ngIf="pedidoSeleccionado; else sinSeleccion">
+
+        <div class="card p-3">
+
+          <p><b>Mesa:</b> {{ pedidoSeleccionado.mesa?.numero }}</p>
+          <p><b>Total:</b> S/ {{ pedidoSeleccionado.total }}</p>
+
+          <!-- tipo comprobante -->
+          <label>Tipo comprobante</label>
+          <select class="form-select mb-2"
+                  [(ngModel)]="tipoComprobante">
+            <option value="BOLETA">Boleta</option>
+            <option value="FACTURA">Factura</option>
+          </select>
+
+          <!-- método pago -->
+          <label>Método de pago</label>
+          <select class="form-select mb-2"
+                  [(ngModel)]="metodoPago">
+            <option value="EFECTIVO">Efectivo</option>
+            <option value="TARJETA">Tarjeta</option>
+            <option value="YAPE">Yape</option>
+          </select>
+
+<!-- TIPO DOCUMENTO -->
+<label>Tipo documento</label>
+<select class="form-select mb-2"
+        [(ngModel)]="cliente.tipoDocumento">
+
+  <option *ngIf="esBoleta()" value="DNI">DNI</option>
+  <option *ngIf="esBoleta()" value="CE">CE</option>
+
+  <option *ngIf="esFactura()" value="RUC">RUC</option>
+
+</select>
+
+        <!-- CLIENTE -->
+<input placeholder="DNI / RUC"
+       [(ngModel)]="cliente.documento"
+       (keyup)="buscarCliente()">
+       <br>
+
+<input *ngIf="esBoleta()"
+       placeholder="Nombre persona"
+       [(ngModel)]="cliente.nombre">
+
+<input *ngIf="esFactura()"
+       placeholder="Razón social"
+       [(ngModel)]="cliente.nombre">
+              <br>
+
+        <input placeholder="Teléfono"
+               [(ngModel)]="cliente.telefono">
+                      <br>
+
+
+        <input placeholder="Correo electrónico"
+               [(ngModel)]="cliente.correo">
+                      <br>
+
+                       <input placeholder="Direccion completa"
+               [(ngModel)]="cliente.direccion">
+                      <br>
+       
+<button class="btn btn-success w-100"
+        (click)="generar()"
+        [disabled]="loading || !validarCliente(cliente)">
+
+            {{ loading ? 'Procesando...' : '💰 Cobrar' }}
+
+          </button>
+
+          
+        </div>
+
+      </div>
+
+      <ng-template #sinSeleccion>
+        <div class="alert alert-info">
+          Selecciona un pedido para cobrar
+        </div>
+      </ng-template>
+
+    </div>
+
+  </div>
+</div>

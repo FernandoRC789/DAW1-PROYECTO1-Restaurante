@@ -1,0 +1,147 @@
+<div class="container mt-4">
+  <h2>🍽️ Gestión de Comidas</h2>
+
+  <!-- 🔍 BUSCAR -->
+  <div class="d-flex gap-2 mb-3">
+    <input [(ngModel)]="filtro" class="form-control" placeholder="Buscar comida">
+    <button class="btn btn-primary" (click)="buscar()">Buscar</button>
+    <button class="btn btn-secondary" (click)="resetear()">Reset</button>
+  </div>
+
+  <!-- 🏷️ FILTRO POR CATEGORIA -->
+  <div class="mb-3">
+    <select [(ngModel)]="categoriaFiltro" class="form-select" (change)="filtrarCategoria()">
+      <option value="">Todas</option>
+      <option *ngFor="let c of categorias" [value]="c.idCat">
+        {{ c.nombre }}
+      </option>
+    </select>
+  </div>
+
+    <!-- 📊 filtro de disponible y no disponible -->
+  <div class="mb-3">
+  <select [(ngModel)]="filtroDisponible"
+          class="form-select"
+          (change)="filtrarDisponibles()">
+
+    <option value="">Seleccione disponible / No Disponible</option>
+    <option value="true">Disponibles</option>
+    <option value="false">No disponibles</option>
+
+  </select>
+</div>
+
+  <!-- 📊 CONTADOR -->
+  <p><strong>Total comidas:</strong> {{ comidas.length }}</p>
+
+  <!-- LOADING -->
+  <div *ngIf="loading" class="text-center my-3">
+    <div class="spinner-border text-primary"></div>
+    <p>Cargando...</p>
+  </div>
+
+  <!-- 📋 TABLA -->
+<table *ngIf="comidas.length > 0" class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Precio</th>
+        <th>Categoría</th>
+        <th>Disponible</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+
+    <tbody [class.opacity-50]="loading">
+      <tr *ngFor="let c of comidasPaginadas">
+        <td>{{ c.nombre }}</td>
+        <td>{{ c.precioUni | currency:'PEN':'S/' }}</td>
+        <td>{{ c.categoria.nombre }}</td>
+        <td>
+          <span class="badge" [ngClass]="getColorDisponible(c.disponible)">
+            {{ c.disponible ? 'Disponible' : 'No disponible' }}
+          </span>
+        </td>
+        <td>
+          <button class="btn btn-warning btn-sm" (click)="editar(c)">✏️</button>
+          <button class="btn btn-danger btn-sm" (click)="eliminar(c.idComida)">❌</button>
+<br>
+          <!-- toggle -->
+          <button class="btn btn-info btn-sm mt-1"
+                  (click)="cambiarDisponible(c.idComida, !c.disponible)">
+            Cambiar Disponibilidad
+          </button>
+
+          
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  
+<div *ngIf="mensaje" class="alert alert-warning text-center mt-3">
+  🔍 {{ mensaje }}
+</div>
+  <!-- PAGINACIÓN -->
+  <div class="d-flex justify-content-center mt-3" *ngIf="comidas.length > tamanoPagina">
+
+    <button class="btn btn-outline-primary me-2"
+            (click)="pagina = pagina - 1"
+            [disabled]="pagina === 1">
+      ⬅️
+    </button>
+
+    <span class="align-self-center">
+      Página {{ pagina }} de {{ totalPaginas }}
+    </span>
+
+    <button class="btn btn-outline-primary ms-2"
+            (click)="pagina = pagina + 1"
+            [disabled]="pagina >= totalPaginas">
+      ➡️
+    </button>
+
+  </div>
+
+  <!-- CREAR -->
+  <div *ngIf="!editando" class="card p-3 mt-3">
+    <h5>Nueva Comida</h5>
+
+    <input [(ngModel)]="nuevo.nombre" class="form-control mb-2" placeholder="Nombre">
+    <input [(ngModel)]="nuevo.precioUni" type="number" class="form-control mb-2" placeholder="Precio">
+
+    <select [(ngModel)]="nuevo.categoria" class="form-select mb-2">
+      <option [ngValue]="null">Seleccione categoría</option>
+      <option *ngFor="let c of categorias" [ngValue]="c">
+        {{ c.nombre }}
+      </option>
+    </select>
+
+    <input [(ngModel)]="nuevo.descripcion"
+       class="form-control mb-2"
+       placeholder="Descripción">
+
+    <button class="btn btn-success" (click)="crear()">Guardar</button>
+  </div>
+
+  <!-- EDITAR -->
+  <div *ngIf="editando" class="card p-3 mt-3">
+    <h5>Editar Comida</h5>
+
+    <input [(ngModel)]="comidaEdit.nombre" class="form-control mb-2">
+    <input [(ngModel)]="comidaEdit.precioUni" type="number" class="form-control mb-2">
+
+    <select [(ngModel)]="comidaEdit.categoria.idCat" class="form-select mb-2">
+      <option *ngFor="let c of categorias" [value]="c.idCat">
+        {{ c.nombre }}
+      </option>
+    </select>
+
+    <input [(ngModel)]="comidaEdit.descripcion"
+          class="form-control mb-2"
+          placeholder="Descripción">
+
+    <button class="btn btn-primary me-2" (click)="actualizar()">Actualizar</button>
+    <button class="btn btn-secondary" (click)="cancelar()">Cancelar</button>
+  </div>
+
+</div>

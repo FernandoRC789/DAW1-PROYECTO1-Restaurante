@@ -1,0 +1,67 @@
+<!-- mesero-historial.html -->
+<div class="container mt-3">
+  <h4>📋 Historial de Pedidos</h4>
+
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border"></div>
+  </div>
+
+<div *ngIf="!loading && pedidos.length === 0" class="text-center mt-4">
+  <div class="card p-4 shadow-sm">
+    <h5>🧾 Sin pedidos</h5>
+    <p class="text-muted">Usted aún no ha registrado pedidos.</p>
+  </div>
+</div>
+  <div *ngIf="!loading && pedidos.length > 0">
+
+  <table class="table table-bordered mt-3" *ngIf="!loading">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Mesa</th>
+        <th>Fecha</th>
+        <th>Estado</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let p of pedidosPaginados">
+        <td>{{ p.idPedido }}</td>
+        <td>{{ p.mesa?.numero }}</td>
+        <td>{{ p.fechaRegistrada }}</td>
+
+        <td>
+          <span class="badge" [ngClass]="getColorEstado(p.estado)">
+            {{ p.estado?.nombre }}
+          </span>
+        </td>
+
+        <td>S/ {{ p.total }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+    <!-- PAGINACIÓN -->
+  <div class="d-flex justify-content-center mt-3" *ngIf="pedidos.length > tamanoPagina">
+
+    <button class="btn btn-outline-primary me-2"
+            (click)="pagina = pagina - 1"
+            [disabled]="pagina === 1">
+      ⬅️
+    </button>
+
+    <span class="align-self-center">
+      Página {{ pagina }} de {{ totalPaginas }}
+    </span>
+
+    <button class="btn btn-outline-primary ms-2"
+            (click)="pagina = pagina + 1"
+            [disabled]="pagina >= totalPaginas">
+      ➡️
+    </button>
+
+  </div>
+    </div>
+
+</div>

@@ -1,0 +1,70 @@
+<h2>Lista de Comidas</h2>
+<button class="btn btn-primary mb-3" (click)="abrirModal()">Nueva Comida</button>
+
+<table class="table table-striped table-hover">
+  <thead class="table-dark">
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Descripción</th>
+      <th>Categoría</th>
+      <th>Precio</th>
+      <th>Disponible</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let c of productos">
+      <td>{{ c.idComida }}</td>
+      <td>{{ c.nombre }}</td>
+      <td>{{ c.descripcion }}</td>
+      <td>{{ c.categoria?.nombre }}</td>
+      <td>{{ c.precioUni | currency:'PEN' }}</td>
+      <td>{{ c.disponible ? 'Sí' : 'No' }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Modal -->
+<div class="modal fade" id="crearModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form (ngSubmit)="guardar()">
+        <div class="modal-header">
+          <h5 class="modal-title">Nueva Comida</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <label>Nombre:</label>
+          <input [(ngModel)]="producto.nombre" name="nombre" class="form-control" required>
+
+          <label>Descripción:</label>
+          <input [(ngModel)]="producto.descripcion" name="descripcion" class="form-control" required>
+
+          <label>Precio:</label>
+          <input type="number" [(ngModel)]="producto.precioUni" name="precioUni" class="form-control" required>
+
+          <label>Disponible:</label>
+          <input type="checkbox" [(ngModel)]="producto.disponible" name="disponible">
+
+          <!-- Campo de categoría -->
+     <label>Categoría:</label>
+<label>Categoría:</label>
+<select [(ngModel)]="producto.categoria.idCat" name="categoria" class="form-select" required>
+  <option [value]="0">-- Seleccione --</option>
+  <option *ngFor="let cat of categorias" [value]="cat.idCat">
+    {{ cat.nombre }}
+  </option>
+</select>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Guardar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+

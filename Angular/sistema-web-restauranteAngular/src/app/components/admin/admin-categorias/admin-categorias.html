@@ -1,0 +1,96 @@
+<div class="container mt-4">
+  <h2>📦 Gestión de Categorías</h2>
+
+  <!-- 🔍 BUSCAR -->
+  <div class="d-flex gap-2 mb-3">
+    <input [(ngModel)]="filtro" class="form-control" placeholder="Buscar categoría">
+    <button class="btn btn-primary" (click)="buscar()">Buscar</button>
+    <button class="btn btn-secondary" (click)="resetear()">Reset</button>
+  </div>
+
+  <!-- 📊 CONTADOR -->
+  <p>
+    <strong>Total categorías:</strong> {{ categorias.length }}
+  </p>
+
+  <!-- 🔄 LOADING -->
+  <div *ngIf="loading" class="text-center my-3">
+    <div class="spinner-border text-primary"></div>
+    <p>Cargando...</p>
+  </div>
+
+  <!-- 📋 TABLA -->
+<table *ngIf="categorias.length > 0" class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let c of categoriasPaginadas">
+        <td>{{ c.nombre }}</td>
+        <td>
+          <button class="btn btn-warning btn-sm" (click)="editar(c)">✏️</button>
+          <button class="btn btn-danger btn-sm" (click)="eliminar(c.idCat)">❌</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="mensaje" class="alert alert-warning text-center mt-3">
+  🔍 {{ mensaje }}
+</div>
+
+  <!-- 📄 PAGINACIÓN -->
+  <div class="d-flex justify-content-center mt-3" *ngIf="totalPaginas > 1">
+
+    <button class="btn btn-outline-primary me-2"
+            (click)="pagina = pagina - 1"
+            [disabled]="pagina === 1">
+      ⬅️ Anterior
+    </button>
+
+    <span class="align-self-center">
+      Página {{ pagina }} de {{ totalPaginas }}
+    </span>
+
+    <button class="btn btn-outline-primary ms-2"
+            (click)="pagina = pagina + 1"
+            [disabled]="pagina >= totalPaginas">
+      Siguiente ➡️
+    </button>
+
+  </div>
+
+  <!-- ➕ CREAR -->
+  <div *ngIf="!editando" class="card mt-4 p-3">
+    <h5>Nueva Categoría</h5>
+
+    <input [(ngModel)]="nueva.nombre"
+           class="form-control mb-2"
+           placeholder="Nombre categoría">
+
+    <button class="btn btn-success" (click)="crear()">
+      Guardar
+    </button>
+  </div>
+
+  <!-- ✏️ EDITAR -->
+  <div *ngIf="editando" class="card mt-4 p-3">
+    <h5>Editar Categoría</h5>
+
+    <input [(ngModel)]="categoriaEdit.nombre"
+           class="form-control mb-2">
+
+    <button class="btn btn-primary me-2" (click)="actualizar()">
+      Actualizar
+    </button>
+
+    <button class="btn btn-secondary" (click)="cancelarEdicion()">
+      Cancelar
+    </button>
+  </div>
+
+</div>

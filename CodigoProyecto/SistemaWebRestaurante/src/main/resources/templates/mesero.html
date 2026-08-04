@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mesero - Pedido</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</head>
+
+<body>
+
+<div class="container mt-4">
+	<h4>👤 Bienvenido, <span th:text="${usuario}"></span></h4>
+    <h2>👨‍🍳 Registro de Pedido</h2>
+
+    <!-- MESA -->
+    <div class="mb-3">
+        <label>Mesa</label>
+        <select id="mesa" class="form-control">
+            <option value="1">Mesa 1</option>
+            <option value="2">Mesa 2</option>
+        </select>
+    </div>
+
+    <!-- OBSERVACIONES -->
+    <div class="mb-3">
+        <label>Observaciones</label>
+        <textarea id="observaciones" class="form-control"
+        placeholder="Ej: sin sal, sin ají..."></textarea>
+    </div>
+
+    <!-- BOTONES -->
+    <div class="d-flex gap-2 mb-3">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalProductos">
+            ➕ Agregar Producto
+        </button>
+
+        <button class="btn btn-danger" onclick="vaciarCarrito()">
+            🗑 Vaciar carrito
+        </button>
+    </div>
+
+    <!-- CARRITO -->
+    <h4>🛒 Pedido</h4>
+    <table class="table table-bordered text-center">
+        <thead class="table-dark">
+            <tr>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="carrito"></tbody>
+    </table>
+
+	<div class="mt-4">
+	    <h5 class="text-danger">❌ No disponibles</h5>
+	    <ul id="noDisponibles" class="list-group"></ul>
+	</div>
+	
+    <h4 class="text-end text-success">
+        Total: <span id="total">S/ 0.00</span>
+    </h4>
+
+    <button class="btn btn-success w-100" onclick="registrarPedido()">
+        💾 Registrar Pedido
+    </button>
+
+</div>
+
+
+<!-- MODAL -->
+<div class="modal fade" id="modalProductos">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5>Seleccionar Producto</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- FILTRO CATEGORIA -->
+        <select id="filtroCategoria" class="form-control mb-2" onchange="filtrarTodo()">
+            <option value="">Todas las categorías</option>
+        </select>
+
+        <!-- BUSCADOR -->
+        <input type="text" id="buscar" class="form-control mb-3"
+               placeholder="🔍 Buscar producto..." onkeyup="filtrarTodo()">
+
+        <table class="table">
+            <tbody id="listaProductos"></tbody>
+        </table>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+
+let carrito = [];
+let productos = [];
+let categorias = [];
+let disponibles = [];
+let noDisponibles = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+    cargarProductos();
+    cargarCategorias();
+
+    const modal = document.getElementById('modalProductos');
+
+    modal.addEventListener('shown.bs.modal', () => {
+        document.getElementById("buscar").value = "";
+        renderProductos(productos);
+    });
+});
+
+// 🔥 CARGAR PRODUCTOS
+
+function cargarProductos() {
+    fetch("http://localhost:8080/api/comidas")
+        .then(res => res.json())
+        .then(data => {
+
+            disponibles = data.filter(p => p.disponible);
+            noDisponibles = data.filter(p => !p.disponible);
+
+            productos = disponibles;
+
+            renderProductos(disponibles);
+            renderNoDisponibles();
+        });
+}
+
+// 🔥 CARGAR CATEGORIAS
+function cargarCategorias() {
+    fetch("http://localhost:8080/api/categorias")
+        .then(res => res.json())
+        .then(data => {
+            categorias = data;
+
+            const select = document.getElementById("filtroCategoria");
+
+            data.forEach(c => {
+                select.innerHTML += `<option value="${c.idCat}">${c.nombre}</option>`;
+            });
+        });
+}
+
+// 🔥 FILTRAR TODO
+function filtrarTodo() {
+    const texto = document.getElementById("buscar").value.toLowerCase();
+    const cat = document.getElementById("filtroCategoria").value;
+
+    let filtrados = productos.filter(p =>
+        p.nombre.toLowerCase().includes(texto)
+    );
+
+    if (cat) {
+        filtrados = filtrados.filter(p => p.categoria.idCat == cat);
+    }
+
+    renderProductos(filtrados);
+}
+
+// 🔥 RENDER PRODUCTOS
+function renderProductos(lista) {
+    const cont = document.getElementById("listaProductos");
+    cont.innerHTML = "";
+
+    if (lista.length === 0) {
+        cont.innerHTML = "<tr><td>No hay resultados</td></tr>";
+        return;
+    }
+
+    lista.forEach(p => {
+        cont.innerHTML += `
+        <tr>
+            <td>${p.nombre}</td>
+            <td>S/ ${p.precioUni}</td>
+            <td>
+                <button class="btn btn-success btn-sm"
+                    onclick='agregarProducto(${p.idComida}, ${JSON.stringify(p.nombre)}, ${p.precioUni})'>
+                    ➕
+                </button>
+            </td>
+        </tr>`;
+    });
+}
+
+// 🔥 AGREGAR
+function agregarProducto(id, nombre, precio) {
+
+    const existe = carrito.find(p => p.id === id);
+
+    if (existe) {
+        existe.cantidad++;
+    } else {
+        carrito.push({ id, nombre, precio, cantidad: 1 });
+    }
+
+    renderCarrito();
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modalProductos'));
+    modal.hide();
+}
+
+// 🔥 VACIAR
+function vaciarCarrito() {
+    if (!confirm("¿Vaciar carrito?")) return;
+    carrito = [];
+    renderCarrito();
+}
+
+// 🔥 ELIMINAR
+function eliminarProducto(id) {
+    carrito = carrito.filter(p => p.id !== id);
+    renderCarrito();
+}
+
+// 🔥 CAMBIAR CANTIDAD
+function cambiarCantidad(id, cantidad) {
+    const prod = carrito.find(p => p.id === id);
+    let cant = parseInt(cantidad);
+
+    if (cant <= 0 || isNaN(cant)) cant = 1;
+
+    prod.cantidad = cant;
+    renderCarrito();
+}
+
+// 🔥 RENDER CARRITO
+function renderCarrito() {
+    const tabla = document.getElementById("carrito");
+    tabla.innerHTML = "";
+
+    let total = 0;
+
+    carrito.forEach(p => {
+        const subtotal = p.precio * p.cantidad;
+        total += subtotal;
+
+        tabla.innerHTML += `
+        <tr>
+            <td>${p.nombre}</td>
+            <td>S/ ${p.precio}</td>
+            <td>
+                <input type="number" value="${p.cantidad}" min="1"
+                    onchange="cambiarCantidad(${p.id}, this.value)"
+                    class="form-control">
+            </td>
+            <td>S/ ${subtotal.toFixed(2)}</td>
+            <td>
+                <button class="btn btn-danger btn-sm"
+                    onclick="eliminarProducto(${p.id})">
+                    ❌
+                </button>
+            </td>
+        </tr>`;
+    });
+
+    document.getElementById("total").innerText = "S/ " + total.toFixed(2);
+}
+
+// 🔥 REGISTRAR
+function registrarPedido() {
+
+    if (carrito.length === 0) {
+        alert("⚠️ No hay productos");
+        return;
+    }
+
+    if (!confirm("¿Registrar pedido?")) return;
+
+    const pedido = {
+        estadoId: 1,
+        mesaId: parseInt(document.getElementById("mesa").value),
+        observaciones: document.getElementById("observaciones").value,
+        detalle: carrito.map(p => ({
+            comidaId: p.id,
+            cantidad: p.cantidad
+        }))
+    };
+
+    fetch("http://localhost:8080/api/pedidos/nuevo", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(pedido)
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert("✅ Pedido registrado N° " + data.idPedido);
+
+        carrito = [];
+        renderCarrito();
+        document.getElementById("observaciones").value = "";
+    })
+    .catch(() => alert("❌ Error al registrar"));
+}
+
+function renderNoDisponibles() {
+    const cont = document.getElementById("noDisponibles");
+    cont.innerHTML = "";
+
+    noDisponibles.forEach(p => {
+        cont.innerHTML += `
+            <li class="list-group-item d-flex justify-content-between">
+                ${p.nombre}
+                <span class="badge bg-danger">Agotado</span>
+            </li>
+        `;
+    });
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,18 @@
+<h2>Nuevo Producto</h2>
+<form (ngSubmit)="guardar()">
+  <label>Nombre:</label>
+  <input [(ngModel)]="producto.nombre" name="nombre" required>
+
+  <label>Descripción:</label>
+  <input [(ngModel)]="producto.descripcion" name="descripcion" required>
+
+  <label>Precio:</label>
+  <input type="number" [(ngModel)]="producto.precioUni" name="precioUni" required>
+
+  <label>Disponible:</label>
+  <input type="checkbox" [(ngModel)]="producto.disponible" name="disponible">
+
+  <button type="submit">Guardar</button>
+</form>
+
+

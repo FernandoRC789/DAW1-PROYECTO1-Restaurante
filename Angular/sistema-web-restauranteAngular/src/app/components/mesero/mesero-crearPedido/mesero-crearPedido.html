@@ -1,0 +1,149 @@
+<div class="container mt-4">
+
+  <h2>📝 Crear Pedido</h2>
+
+  <!-- 🪑 MESAS -->
+  <h5>Seleccionar Mesa</h5>
+
+  <div class="d-flex flex-wrap gap-2 mb-3">
+<button
+  *ngFor="let m of mesas"
+  class="btn"
+  [ngClass]="{
+    'btn-success': m.estado_mesa === EstadoMesa.LIBRE,
+    'btn-danger': m.estado_mesa === EstadoMesa.OCUPADO,
+    'btn-warning': m.estado_mesa === EstadoMesa.RESERVADO,
+    'border border-dark': mesaSeleccionada?.idMesa === m.idMesa
+  }"
+
+  [disabled]="m.estado_mesa === EstadoMesa.OCUPADO"
+  (click)="mesaSeleccionada = m">
+
+  Mesa {{ m.numero }}
+</button>
+  </div>
+
+<p *ngIf="mesaSeleccionada">
+  Mesa seleccionada: {{ mesaSeleccionada.numero }}
+</p>
+
+  <!-- 🍽️ COMIDAS -->
+   <button class="btn btn-primary" (click)="abrirModal = true">
+  ➕ Agregar comida
+</button>
+<br><br>
+<select [(ngModel)]="filtroDisponible" class="form-select mb-2">
+  <option value="">Todas</option>
+  <option value="true">Disponibles</option>
+  <option value="false">No disponibles</option>
+</select>
+
+<!-- OVERLAY -->
+<div class="custom-modal-backdrop" *ngIf="abrirModal"></div>
+
+<!-- MODAL -->
+<div class="custom-modal" *ngIf="abrirModal">
+
+  <div class="modal-card">
+
+    <!-- HEADER -->
+    <div class="modal-header">
+      <h5>🍝 Seleccionar comida</h5>
+      <button class="btn-close" (click)="abrirModal = false"></button>
+    </div>
+
+    <!-- BODY -->
+    <div class="modal-body">
+
+      <input [(ngModel)]="filtro"
+             placeholder="Buscar comida..."
+             class="form-control mb-3">
+
+      <div style="max-height: 300px; overflow-y: auto;">
+
+        <div *ngFor="let c of comidasFiltradas()"
+             class="d-flex justify-content-between align-items-center border p-2 mb-2 rounded">
+
+          <div>
+            <strong>{{ c.nombre }}</strong><br>
+            <small>S/. {{ c.precioUni }}</small>
+          </div>
+
+          <button class="btn btn-sm btn-primary"
+                  [disabled]="!c.disponible"
+                  (click)="agregar(c)">
+            Agregar
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="abrirModal = false">
+        Cerrar
+      </button>
+    </div>
+
+  </div>
+</div>
+<hr>
+  <!-- 🛒 CARRITO -->
+  <h5 class="mt-4">Pedido</h5>
+
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Comida</th>
+        <th>Cantidad</th>
+        <th>Precio</th>
+        <th>Subtotal</th>
+        <th></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let item of carrito">
+        <td>{{ item.comida.nombre }}</td>
+
+<td style="width: 120px;">
+  <input type="number"
+         class="form-control text-center"
+         min="1"
+         [(ngModel)]="item.cantidad"
+         (change)="actualizarCantidad(item)">
+</td>
+
+        <td>{{ item.comida.precioUni }}</td>
+
+        <td>{{ item.comida.precioUni * item.cantidad }}</td>
+
+        <td>
+          <button class="btn btn-sm btn-danger"
+                  (click)="eliminar(item)">❌</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 💰 TOTAL -->
+  <h4>Total: S/. {{ total }}</h4>
+
+  <div class="mb-3 mt-3">
+  <label>Observaciones</label>
+  <textarea class="form-control"
+            [(ngModel)]="observaciones"
+            placeholder="Ej: sin cebolla, bien cocido, etc...">
+  </textarea>
+</div>
+
+  <!-- 🚀 CREAR -->
+  <button class="btn btn-success"
+          (click)="crearPedido()">
+    Crear Pedido
+  </button>
+
+</div>

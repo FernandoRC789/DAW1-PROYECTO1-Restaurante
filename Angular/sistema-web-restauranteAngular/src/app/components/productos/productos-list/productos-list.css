@@ -1,0 +1,82 @@
+/* Estilo general */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(to bottom, #e0f7fa, #ffffff);
+  margin: 0;
+  padding: 20px;
+  color: #004d40;
+}
+
+/* Título */
+h2 {
+  text-align: center;
+  color: #00695c;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Tabla */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Encabezados */
+thead {
+  background-color: #004d40;
+  color: #ffffff;
+}
+
+thead th {
+  padding: 12px;
+  text-align: left;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+/* Filas */
+tbody tr {
+  border-bottom: 1px solid #ddd;
+  transition: background-color 0.3s ease;
+}
+
+tbody tr:hover {
+  background-color: #e0f2f1;
+}
+
+/* Celdas */
+td {
+  padding: 10px;
+  font-size: 0.95rem;
+}
+
+/* Columna de precio */
+td:nth-child(5) {
+  font-weight: bold;
+  color: #00796b;
+}
+
+/* Columna de disponibilidad */
+td:nth-child(6) {
+  text-align: center;
+  font-weight: bold;
+}
+
+td:nth-child(6)::before {
+  content: "• ";
+  color: #00796b;
+}
+
+/* Footer opcional */
+footer {
+  text-align: center;
+  margin-top: 30px;
+  font-size: 0.85rem;
+  color: #555;
+}

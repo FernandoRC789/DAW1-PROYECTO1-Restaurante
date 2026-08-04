@@ -1,0 +1,6 @@
+export enum EstadoMesa {
+  LIBRE = 'LIBRE',
+  OCUPADO = 'OCUPADO',
+  RESERVADO = 'RESERVADO',
+  NO_DISPONIBLE = 'NO_DISPONIBLE'
+}

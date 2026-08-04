@@ -1,0 +1,97 @@
+<div class="container mt-4">
+  <h2>🪑 Gestión de Mesas</h2>
+<div *ngIf="loading" class="text-center my-3">
+  <div class="spinner-border text-primary"></div>
+  <p>Cargando mesas...</p>
+</div>
+<p>
+  <strong>Total mesas:</strong> {{ mesas.length }}
+</p>
+
+
+  <!-- TABLA -->
+  <table class="table table-bordered mt-3">
+    <thead>
+      <tr>
+        <th>N° Mesa</th>
+        <th>Asientos</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+
+    <tbody [class.opacity-50]="loading">
+      <tr *ngFor="let m of mesasPaginadas">
+        <td>{{ m.numero }}</td>
+        <td>{{ m.asientos }}</td>
+        <td>
+            <span class="badge" [ngClass]="getColorEstado(m.estado_mesa)">
+            {{ m.estado_mesa }}
+            </span>
+        </td>
+        <td>
+          <button class="btn btn-warning btn-sm" (click)="editar(m)">✏️</button>
+          <button class="btn btn-danger btn-sm" (click)="eliminar(m.idMesa)">❌</button>
+
+          <!-- CAMBIAR ESTADO -->
+          <select class="form-select mt-1"
+                  [value]="m.estado_mesa"
+                  (change)="confirmarCambioEstado(m, $any($event.target).value)">
+
+            <option [value]="m.estado_mesa" disabled>
+              {{ m.estado_mesa }}
+            </option>
+
+            <option value="RESERVADO">RESERVADO</option>
+            <option value="NO_DISPONIBLE">NO DISPONIBLE</option>
+
+            <!-- opcional -->
+            <option value="LIBRE">LIBRE</option>
+
+          </select>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="d-flex justify-content-center mt-3" *ngIf="mesas.length > tamanoPagina">
+
+    <button class="btn btn-outline-primary me-2"
+            (click)="pagina = pagina - 1"
+            [disabled]="pagina === 1">
+      ⬅️ Anterior
+    </button>
+
+    <span class="align-self-center">
+      Página {{ pagina }} de {{ totalPaginas }}
+    </span>
+
+    <button class="btn btn-outline-primary ms-2"
+            (click)="pagina = pagina + 1"
+            [disabled]="pagina >= totalPaginas">
+      Siguiente ➡️
+    </button>
+
+  </div>
+
+  <!-- CREAR -->
+  <div *ngIf="!editando" class="card p-3 mt-3">
+    <h5>Nueva Mesa</h5>
+
+    <input [(ngModel)]="nuevo.numero" class="form-control mb-2" placeholder="Número">
+    <input [(ngModel)]="nuevo.asientos" type="number" class="form-control mb-2">
+
+    <button class="btn btn-success" (click)="crear()">Guardar</button>
+  </div>
+
+  <!-- EDITAR -->
+  <div *ngIf="editando" class="card p-3 mt-3">
+    <h5>Editar Mesa</h5>
+
+    <input [(ngModel)]="mesaEdit.numero" class="form-control mb-2" disabled>
+    <input [(ngModel)]="mesaEdit.asientos" type="number" class="form-control mb-2">
+
+    <button class="btn btn-primary me-2" (click)="actualizar()">Actualizar</button>
+    <button class="btn btn-secondary" (click)="cancelar()">Cancelar</button>
+  </div>
+</div>

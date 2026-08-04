@@ -1,0 +1,30 @@
+<div class="bg-light border-end vh-100 p-3" style="width: 220px;">
+  <h5>📋 Menú</h5>
+
+  <!-- ADMIN -->
+  <div *ngIf="rol === 'ROLE_ADMIN'">
+    <a routerLink="/admin/usuarios" class="nav-link">👤 Usuarios</a>
+    <a routerLink="/admin/categorias" class="nav-link">🍽️ Categorías</a>
+    <a routerLink="/admin/mesas" class="nav-link">🪑 Mesas</a>
+    <a routerLink="/admin/comidas" class="nav-link">🍝 Comidas</a>
+
+  </div>
+
+  <!-- COCINA -->
+  <div *ngIf="rol === 'ROLE_COCINA'">
+    <a routerLink="/cocina/pedidos" class="nav-link">🍳 Pedidos</a>
+    <a routerLink="/cocina/comidas" class="nav-link">📦 Estado De Comidas</a>
+  </div>
+
+  <!-- MESERO -->
+  <div *ngIf="rol === 'ROLE_MESERO'">
+    <a routerLink="/mesero/pedidos" class="nav-link">🧑‍🍽️ Registrar Pedido</a>
+    <a routerLink="/mesero/historial" class="nav-link">📋 Historial Pedidos</a>
+  </div>
+
+  <!-- CAJA -->
+  <div *ngIf="rol === 'ROLE_CAJERO'">
+    <a routerLink="/caja/comprobante" class="nav-link">💰 VentaComprobante</a>
+    <a routerLink="/caja/historial" class="nav-link">🗃️ Historial</a>
+  </div>
+</div>

@@ -1,0 +1,134 @@
+<div class="container mt-4">
+  <h2>👤 Gestión de Usuarios</h2>
+
+  <!-- 🔍 BUSCAR -->
+  <div class="d-flex gap-2 mb-3">
+    <input [(ngModel)]="filtro" class="form-control" placeholder="Buscar usuario">
+    <button class="btn btn-primary" (click)="buscar()">Buscar</button>
+    <button class="btn btn-secondary" (click)="resetear()">Reset</button>
+  </div>
+
+  <!-- 🏷️ FILTRO POR ROL -->
+  <div class="mb-3">
+    <select [(ngModel)]="rolFiltro" class="form-select" (ngModelChange)="filtrarRol()">
+      <option value="">Todos</option>
+      <option value="ADMIN">ADMIN</option>
+      <option value="MESERO">MESERO</option>
+      <option value="COCINA">COCINA</option>
+      <option value="CAJERO">CAJERO</option>
+    </select>
+  </div>
+
+  <!-- 📊 CONTADOR -->
+<p>
+  <strong>
+    {{ rolFiltro ? 'Total por rol' : 'Total usuarios' }}:
+  </strong>
+  {{ rolFiltro ? totalRol : usuarios.length }}
+</p>
+
+<div *ngIf="loading" class="text-center my-3">
+  <div class="spinner-border text-primary"></div>
+  <p>Cargando...</p>
+</div>
+  <!-- 📋 TABLA -->
+<table *ngIf="usuarios.length > 0" class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Roles</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+      <tbody [class.opacity-50]="loading">
+      <tr *ngFor="let u of usuariosPaginados">
+        <td>{{ u.username }}</td>
+        <td>
+          <span *ngFor="let r of u.roles" class="badge bg-primary me-1">
+            {{ r.nombre }}
+          </span>
+        </td>
+        <td>
+          <button class="btn btn-warning btn-sm" (click)="editar(u)">
+            ✏️
+          </button>
+          <button class="btn btn-danger btn-sm" (click)="eliminar(u.idUser)">❌</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  
+<div *ngIf="mensaje" class="alert alert-warning text-center mt-3">
+  🔍 {{ mensaje }}
+</div>
+  <div class="d-flex justify-content-center mt-3" *ngIf="usuarios.length > 4">
+
+  <button class="btn btn-outline-primary me-2"
+          (click)="pagina = pagina - 1"
+          [disabled]="pagina === 1">
+    ⬅️ Anterior
+  </button>
+
+  <span class="align-self-center">
+    Página {{ pagina }} de {{ totalPaginas }}
+  </span>
+
+  <button class="btn btn-outline-primary ms-2"
+          (click)="pagina = pagina + 1"
+          [disabled]="pagina >= totalPaginas">
+    Siguiente ➡️
+  </button>
+
+</div>
+
+  <!-- ➕ form - CREAR -->
+<div *ngIf="!editando">
+
+  <h5>Nuevo Usuario</h5>
+
+  <input [(ngModel)]="nuevo.username" class="form-control mb-2" placeholder="Username">
+  <input [(ngModel)]="nuevo.password" class="form-control mb-2" placeholder="Password">
+
+  <label>Roles:</label>
+
+  <div>
+    <input type="checkbox" [(ngModel)]="rolesNuevo.ADMIN"> ADMIN
+    <input type="checkbox" [(ngModel)]="rolesNuevo.MESERO"> MESERO
+    <input type="checkbox" [(ngModel)]="rolesNuevo.COCINA"> COCINA
+    <input type="checkbox" [(ngModel)]="rolesNuevo.CAJERO"> CAJERO
+  </div>
+
+  <button class="btn btn-success mt-2" (click)="crear()">
+    Guardar
+  </button>
+
+</div>
+
+  <!-- ➕ form - EDITAR -->
+<div *ngIf="editando">
+
+  <h5>Editar Usuario</h5>
+
+  <input [(ngModel)]="usuarioEdit.username" class="form-control mb-2">
+  <input [(ngModel)]="usuarioEdit.password" class="form-control mb-2" placeholder="Nueva password (opcional)">
+
+  <label>Roles:</label>
+
+  <div>
+    <input type="checkbox" [(ngModel)]="rolesEdit.ADMIN"> ADMIN
+    <input type="checkbox" [(ngModel)]="rolesEdit.MESERO"> MESERO
+    <input type="checkbox" [(ngModel)]="rolesEdit.COCINA"> COCINA
+    <input type="checkbox" [(ngModel)]="rolesEdit.CAJERO"> CAJERO
+  </div>
+
+  <button class="btn btn-primary mt-2 me-2" (click)="actualizar()">
+    Actualizar
+  </button>
+
+  <button class="btn btn-secondary mt-2" (click)="cancelarEdicion()">
+    Cancelar
+  </button>
+
+</div>
+</div>
+

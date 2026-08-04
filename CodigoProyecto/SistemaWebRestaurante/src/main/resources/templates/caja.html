@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Caja</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-4">
+    <h2>💰 Caja - Cobro</h2>
+
+    <!-- Buscar pedido -->
+    <div class="mb-3">
+        <label>Mesa</label>
+        <select class="form-control">
+            <option>Mesa 1</option>
+            <option>Mesa 2</option>
+        </select>
+    </div>
+
+    <!-- Detalle -->
+    <h4>Detalle del Pedido</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Cant</th>
+                <th>Precio</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Pollo</td>
+                <td>1</td>
+                <td>30</td>
+                <td>30</td>
+            </tr>
+            <tr>
+                <td>Gaseosa</td>
+                <td>2</td>
+                <td>5</td>
+                <td>10</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4>Total: S/ 40</h4>
+
+    <!-- Cliente opcional -->
+    <h5>Datos del Cliente (Opcional)</h5>
+
+    <input type="text" class="form-control mb-2" placeholder="DNI o RUC">
+    <input type="text" class="form-control mb-2" placeholder="Nombre">
+
+    <button class="btn btn-primary">💳 Cobrar</button>
+</div>
+
+</body>
+</html>

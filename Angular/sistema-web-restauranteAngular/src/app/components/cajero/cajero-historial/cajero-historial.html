@@ -1,0 +1,70 @@
+<h2>📄 Historial de Comprobantes</h2>
+
+<!-- 🔎 FILTROS -->
+<div style="margin-bottom: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
+  <input [(ngModel)]="filtroNumero" placeholder="Buscar por número de comprobante">
+  <input [(ngModel)]="filtroDocumento" placeholder="DNI / RUC">
+  
+  <select [(ngModel)]="filtroMetodo">
+    <option value="">Método</option>
+    <option value="EFECTIVO">Efectivo</option>
+    <option value="YAPE">Yape</option>
+    <option value="TARJETA">Tarjeta</option>
+  </select>
+
+    <select [(ngModel)]="filtroTipo">
+    <option value="">Tipo</option>
+    <option value="BOLETA">Boleta</option>
+    <option value="FACTURA">Factura</option>
+  </select>
+
+  <button (click)="filtrar()">Buscar</button>
+  <button (click)="listar()">Reset</button>
+</div>
+
+<!-- ⏳ LOADING -->
+<div *ngIf="loading">
+  Cargando comprobantes...
+</div>
+
+<!-- 📊 TABLA -->
+<table *ngIf="!loading" border="1" width="100%">
+  <thead>
+    <tr>
+      <th>Número</th>
+      <th>Cliente</th>
+      <th>Total</th>
+      <th>Método</th>
+      <th>Fecha</th>
+      <th>Tipo</th>
+      <th>Estado</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let c of comprobantes">
+      <td>{{ c.numero }}</td>
+      <td>{{ c.cliente?.nombre || 'Sin cliente' }}</td>
+      <td>{{ c.total }}</td>
+      <td>{{ c.metodoPago }}</td>
+      <td>{{ c.fechaEmision | date:'dd/MM/yyyy HH:mm' }}</td>
+      <td>{{ c.tipoComprobante }}</td>
+      <!-- 🎨 estado -->
+      <td>
+        <span [ngClass]="getEstadoClase(c.estado?.nombre)">
+          {{ c.estado?.nombre }}
+        </span>
+      </td>
+
+      <!-- ❌ acción -->
+      <td>
+        <button 
+          (click)="anular(c.idComprobantePago)"
+          [disabled]="c.estado?.nombre === 'ANULADO'">
+          Anular
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>
