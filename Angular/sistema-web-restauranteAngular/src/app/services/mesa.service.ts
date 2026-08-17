@@ -6,7 +6,7 @@ import { Mesa } from '../models/mesa.model';
 @Injectable({ providedIn: 'root' })
 export class MesaService {
 
-  private apiUrl = 'http://localhost:8080/api/mesas';
+  private apiUrl = 'http://localhost:8081/api/mesas';
 
   constructor(private http: HttpClient) {}
 

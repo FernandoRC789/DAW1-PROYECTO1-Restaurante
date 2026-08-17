@@ -9,7 +9,7 @@ import { ComprobanteRequest } from "../models/comprobante.request.model";
 export class CajaService {
 
   // 🔥 base única (NO duplicar URLs)
-  private api = 'http://localhost:8080/api/comprobantes';
+  private api = 'http://localhost:8081/api/comprobantes';
 
   constructor(private http: HttpClient) {}
 
