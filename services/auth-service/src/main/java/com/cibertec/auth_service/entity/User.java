@@ -1,5 +1,6 @@
 package com.cibertec.auth_service.entity;
 
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -39,7 +40,7 @@ public class User {
 		    joinColumns = @JoinColumn(name = "usuario_id", referencedColumnName = "idUser"),
 		    inverseJoinColumns = @JoinColumn(name = "rol_id", referencedColumnName = "idRole")
 		)
-	private Set<Role> roles;
+	private Set<Role> roles = new HashSet<>();;
 	
 	//se elimino la dependencia de pedido eso se usara en el microservicio de ORDER.
 }
