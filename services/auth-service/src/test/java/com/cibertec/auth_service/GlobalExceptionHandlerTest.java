@@ -19,6 +19,8 @@ import com.cibertec.auth_service.config.SecurityConfig;
 import com.cibertec.auth_service.exception.BadRequestException;
 import com.cibertec.auth_service.exception.GlobalExceptionHandler;
 import com.cibertec.auth_service.exception.ResourceNotFoundException;
+import com.cibertec.auth_service.security.JwtUtils;
+import com.cibertec.auth_service.service.UserDetailsServiceImpl;
 import com.cibertec.auth_service.service.UserService;
 
 // Controlador temporal exclusivo para probar que las excepciones devuelven los códigos correctos
@@ -46,6 +48,12 @@ public class GlobalExceptionHandlerTest {
     // Mockeamos el UserService para que el contexto de seguridad/controladores cargue sin problemas
     @MockitoBean
     private UserService userService;
+    
+    @MockitoBean
+    private JwtUtils jwtUtils; // 👈 Mock para satisfacer al filtro de seguridad
+
+    @MockitoBean
+    private UserDetailsServiceImpl userDetailsServiceImpl; // 👈 Mock para satisfacer al filtro de seguridad
 
     @Test
     void testResourceNotFoundException_DebeRetornar404() throws Exception {

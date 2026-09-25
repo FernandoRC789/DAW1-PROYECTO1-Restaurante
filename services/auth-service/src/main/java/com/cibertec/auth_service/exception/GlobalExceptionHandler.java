@@ -78,4 +78,17 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+    
+    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
+    public ResponseEntity<ErrorDetails> handleBadCredentialsException(
+            org.springframework.security.authentication.BadCredentialsException ex, 
+            WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(
+            LocalDateTime.now(), // 👈 Usamos LocalDateTime para que coincida con el constructor
+            HttpStatus.UNAUTHORIZED.value(), 
+            "Usuario o contraseña incorrectos", 
+            request.getDescription(false)
+        );
+        return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
+    }
 }

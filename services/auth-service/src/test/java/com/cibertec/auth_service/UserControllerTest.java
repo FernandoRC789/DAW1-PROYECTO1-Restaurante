@@ -22,6 +22,8 @@ import com.cibertec.auth_service.config.SecurityConfig;
 import com.cibertec.auth_service.controller.UserController;
 import com.cibertec.auth_service.dto.UserCreateDTO;
 import com.cibertec.auth_service.dto.UserResponseDTO;
+import com.cibertec.auth_service.security.JwtUtils;
+import com.cibertec.auth_service.service.UserDetailsServiceImpl;
 import com.cibertec.auth_service.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -35,6 +37,12 @@ public class UserControllerTest {
 
     @MockitoBean // Cambia a @MockBean si tu versión de Spring Boot lo requiere
     private UserService userService;
+    
+    @MockitoBean
+    private JwtUtils jwtUtils; // 👈 Mock para satisfacer al filtro de seguridad
+
+    @MockitoBean
+    private UserDetailsServiceImpl userDetailsServiceImpl; // 👈 Mock para satisfacer al filtro de seguridad
 
  // Instanciamos el ObjectMapper directamente para evitar problemas de beans en el test
     private final ObjectMapper objectMapper = new ObjectMapper();
