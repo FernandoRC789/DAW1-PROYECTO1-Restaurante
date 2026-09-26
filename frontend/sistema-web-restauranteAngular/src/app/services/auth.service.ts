@@ -8,49 +8,42 @@ import { tap } from 'rxjs/operators';
 })
 export class AuthService {
 
-  private apiUrl = 'http://localhost:8081';
+  private apiUrl = 'http://localhost:8082';
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  login(username: string, password: string) {
-    const body = new URLSearchParams();
-    body.set('username', username);
-    body.set('password', password);
+login(username: string, password: string) {
+    // Ahora enviamos un objeto JSON plano
+    const body = { username, password };
 
-    return this.http.post<any>(`${this.apiUrl}/login`, body.toString(), {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      withCredentials: true
-    }).pipe(
+    return this.http.post<any>(`${this.apiUrl}/api/auth/login`, body).pipe(
       tap((res: any) => {
-        // 🔥 guardar rol
-        localStorage.setItem('rol', res.rol);
+        // 🔥 Guardamos el token JWT y el rol principal en el localStorage
+        localStorage.setItem('token', res.token);
+        localStorage.setItem('rol', res.roles[0]); // Ej: "ROLE_ADMIN"
 
-        // 🔥 redirección automática
-        this.redirectByRole(res.rol);
+        // 🔥 Redirección automática según el rol
+        this.redirectByRole(res.roles[0]);
       })
     );
   }
 
 logout() {
-  this.http.post(`${this.apiUrl}/logout`, {}, {
-    withCredentials: true
-  }).subscribe({
-    next: () => {
-      localStorage.clear();
-      this.router.navigate(['/login']); // ✅ correcto
-    },
-    error: (err) => {
-      console.error('Logout error', err);
-    }
-  });
-}
+    // En arquitectura Stateless (JWT), el logout es local: limpiamos el navegador
+    localStorage.clear();
+    this.router.navigate(['/login']);
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
 
   getRol(): string | null {
     return localStorage.getItem('rol');
   }
 
   isLogged(): boolean {
-    return !!localStorage.getItem('rol');
+    return !!localStorage.getItem('token'); // Verificamos si existe el token
   }
 
   redirectByRole(rol: string) {
