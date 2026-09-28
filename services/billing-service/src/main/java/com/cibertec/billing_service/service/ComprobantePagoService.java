@@ -8,7 +8,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.cibertec.billing_service.client.ClienteRestConsumer;
 import com.cibertec.billing_service.dto.CierreCajaDTO;
+import com.cibertec.billing_service.dto.ClienteDTO;
 import com.cibertec.billing_service.dto.ComprobanteDTO;
 import com.cibertec.billing_service.dto.ComprobanteResponseDTO;
 import com.cibertec.billing_service.model.ComprobanteDePago;
@@ -16,7 +18,6 @@ import com.cibertec.billing_service.model.EstadoComprobante;
 import com.cibertec.billing_service.repository.ComprobanteDePagoRepository;
 import com.cibertec.billing_service.repository.EstadoComprobanteRepository;
 import com.cibertec.billing_service.repository.EstadoRepository;
-
 import com.cibertec.billing_service.utilsEnum.MetodoPago;
 import com.cibertec.billing_service.utilsEnum.TipoComprobante;
 
@@ -43,7 +44,8 @@ public class ComprobantePagoService {
     private EstadoComprobanteRepository estadoRepo;
 
     
-
+    @Autowired
+    private ClienteRestConsumer clienteRestConsumer; // 👈 Inyectamos nuestro Feign Client
     
 
     @Autowired
@@ -116,6 +118,19 @@ public class ComprobantePagoService {
         if (comprobanteRepo.existsByOrderId(dto.getPedidoId())) {
             throw new RuntimeException("El pedido con ID " + dto.getPedidoId() + " ya tiene comprobante");
         }
+        
+     // 🔍 Validar cliente consultando por Feign Client si se envió un clienteId
+        if (dto.getClienteId() != null) {
+            try {
+                ClienteDTO clienteDTO = clienteRestConsumer.obtenerClientePorId(dto.getClienteId());
+                if (clienteDTO == null) {
+                    throw new RuntimeException("El cliente con ID " + dto.getClienteId() + " no fue encontrado en customer-service");
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Error al comunicarse con customer-service: " + e.getMessage());
+            }
+        }
+        
 
         EstadoComprobante estado = estadoRepo.findByNombre("PAGADO")
                 .orElseThrow(() -> new RuntimeException("Estado PAGADO no configurado"));
