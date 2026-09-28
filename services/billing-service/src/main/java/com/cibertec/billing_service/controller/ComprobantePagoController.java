@@ -114,4 +114,9 @@ public class ComprobantePagoController {
         );
     }
     
+    @GetMapping("/{id}/detalle-cliente")
+    public ResponseEntity<ComprobanteResponseDTO> obtenerDetalleConCliente(@PathVariable Long id) {
+        return ResponseEntity.ok(comprobanteService.obtenerComprobanteConCliente(id));
+    }
+    
 }
