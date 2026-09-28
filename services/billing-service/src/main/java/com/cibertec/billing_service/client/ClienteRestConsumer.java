@@ -13,7 +13,8 @@ import com.cibertec.billing_service.dto.ClienteDTO;
  */
 // 'name' es el nombre registrado en Eureka / Gateway.
 // 'url' se usa mientras se prueba de forma local sin Eureka (ej: puerto 8081).
-@FeignClient(name = "customer-service", url = "${external.service.customer-url:http://localhost:8086}")
+//@FeignClient(name = "customer-service", url = "${external.service.customer-url:http://localhost:8086}")
+@FeignClient(name = "customer-service")
 public interface ClienteRestConsumer {
 
     @GetMapping("/api/clientes/{id}")
