@@ -10,20 +10,41 @@ spring:
         locator:
           enabled: true # Permite descubrir automáticamente los servicios registrados en Eureka
       routes:
+        # 1. Ruta para el microservicio de Autenticación y Seguridad
         - id: auth-service-route
-          uri: lb://auth-service # Se conecta automáticamente al servicio de autenticación a través de Eureka
+          uri: lb://auth-service
           predicates:
-            - Path=/api/auth/** # Cualquier petición que empiece con /api/auth/ se va al auth-service
+            - Path=/api/auth/**
 
+        # 2. Ruta para el microservicio de Facturación / Cobros
         - id: billing-service-route
-          uri: lb://billing-service # Cualquier petición que empiece con /api/auth/ se va al auth-service
+          uri: lb://billing-service
           predicates:
-            - Path=/api/billing/** # Cualquier petición que empiece con /api/billing/ se va al billing-service
+            - Path=/api/billing/**
 
+        # 3. Ruta para el microservicio de Operaciones
         - id: operations-service-route
           uri: lb://operations-service
           predicates:
             - Path=/api/operations/**
+
+        # 4. Ruta para el microservicio de Catálogo
+        - id: catalog-service-route
+          uri: lb://catalog-service
+          predicates:
+            - Path=/api/catalog/**
+
+        # 5. Ruta para el microservicio de Clientes
+        - id: customers-service-route
+          uri: lb://customers-service
+          predicates:
+            - Path=/api/customers/**
+
+        # 6. Ruta para el microservicio de Pedidos / Órdenes
+        - id: order-service-route
+          uri: lb://order-service
+          predicates:
+            - Path=/api/order/**
 
 eureka:
   client:
