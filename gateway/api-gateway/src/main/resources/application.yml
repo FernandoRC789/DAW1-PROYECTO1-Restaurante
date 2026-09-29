@@ -1,0 +1,33 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true # Permite descubrir automáticamente los servicios registrados en Eureka
+      routes:
+        - id: auth-service-route
+          uri: lb://auth-service # Se conecta automáticamente al servicio de autenticación a través de Eureka
+          predicates:
+            - Path=/api/auth/** # Cualquier petición que empiece con /api/auth/ se va al auth-service
+
+        - id: billing-service-route
+          uri: lb://billing-service # Cualquier petición que empiece con /api/auth/ se va al auth-service
+          predicates:
+            - Path=/api/billing/** # Cualquier petición que empiece con /api/billing/ se va al billing-service
+
+        - id: operations-service-route
+          uri: lb://operations-service
+          predicates:
+            - Path=/api/operations/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
