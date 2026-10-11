@@ -43,7 +43,7 @@ public class ComprobantePagoController {
     }
 
     /**
-     * Buscar por número
+     * 📌 Buscar por número
      */
     @GetMapping("/numero/{numero}")
     public ResponseEntity<?> buscarPorNumero(@PathVariable String numero) {
@@ -103,5 +103,5 @@ public class ComprobantePagoController {
     @GetMapping("/{id}/detalle-cliente")
     public ResponseEntity<ComprobanteResponseDTO> obtenerDetalleConCliente(@PathVariable Long id) {
         return ResponseEntity.ok(comprobanteService.obtenerComprobanteConCliente(id));
-    }
+    }    
 }
