@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_ROUTES } from '../config/api.config';
 
 export interface Usuario {
   idUser: number;
@@ -11,7 +12,7 @@ export interface Usuario {
 @Injectable({ providedIn: 'root' })
 export class UsuarioService {
 
-  private api = 'http://localhost:8081/api/usuarios';
+  private api = API_ROUTES.USERS;
 
   constructor(private http: HttpClient) {}
 
@@ -20,7 +21,7 @@ export class UsuarioService {
   }
 
   crear(data: any) {
-    return this.http.post(`${this.api}/nuevo`, data, { withCredentials: true });
+    return this.http.post(`${this.api}`, data, { withCredentials: true });
   }
 
   actualizar(id: number, data: any) {

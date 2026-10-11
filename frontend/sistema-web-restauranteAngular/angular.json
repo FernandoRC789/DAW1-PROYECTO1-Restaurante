@@ -63,7 +63,8 @@
               "buildTarget": "sistema-web-restaurante:build:production"
             },
             "development": {
-              "buildTarget": "sistema-web-restaurante:build:development"
+              "buildTarget": "sistema-web-restaurante:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

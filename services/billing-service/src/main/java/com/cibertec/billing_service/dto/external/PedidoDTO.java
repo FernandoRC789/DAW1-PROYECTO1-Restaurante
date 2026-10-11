@@ -2,12 +2,15 @@ package com.cibertec.billing_service.dto.external;
 
 import java.math.BigDecimal;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty; // 👈 Importa esto
 
 public class PedidoDTO {
     private Long idPedido;
     private BigDecimal total;
     private Long mesaId;
     private String estado;
+    
+    @JsonProperty("detallePedido")
     private List<DetallePedidoDTO> detalles;
 
     public PedidoDTO() {}

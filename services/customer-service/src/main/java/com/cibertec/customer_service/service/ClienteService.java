@@ -2,9 +2,12 @@ package com.cibertec.customer_service.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cibertec.customer_service.client.PedidoFeignClient;
+import com.cibertec.customer_service.dto.PedidoDTO;
 import com.cibertec.customer_service.exception.RecursoDuplicadoException;
 import com.cibertec.customer_service.exception.RecursoNoEncontradoException;
 import com.cibertec.customer_service.model.Cliente;
@@ -15,6 +18,9 @@ import com.cibertec.customer_service.repository.ClienteRepository;
 public class ClienteService {
 
     private final ClienteRepository clienteRepository;
+
+    @Autowired
+    private PedidoFeignClient pedidoFeignClient;
 
     public ClienteService(ClienteRepository clienteRepository) {
         this.clienteRepository = clienteRepository;
@@ -45,6 +51,7 @@ public class ClienteService {
         return clienteRepository.findByNombreContainingIgnoreCase(nombre);
     }
 
+    @Transactional
     public Cliente crear(Cliente cliente) {
         if (clienteRepository.existsByDocumento(cliente.getDocumento())) {
             throw new RecursoDuplicadoException(
@@ -55,6 +62,7 @@ public class ClienteService {
         return clienteRepository.save(cliente);
     }
 
+    @Transactional
     public Cliente actualizar(Long id, Cliente datos) {
         Cliente actual = obtenerPorId(id);
 
@@ -75,6 +83,7 @@ public class ClienteService {
         return clienteRepository.save(actual);
     }
 
+    @Transactional
     public void eliminar(Long id) {
         if (!clienteRepository.existsById(id)) {
             throw new RecursoNoEncontradoException(
@@ -88,8 +97,23 @@ public class ClienteService {
      * si el documento existe, devuelve el cliente;
      * si no existe, lo crea.
      */
+    @Transactional
     public Cliente obtenerOCrear(Cliente cliente) {
         return clienteRepository.findByDocumento(cliente.getDocumento())
                 .orElseGet(() -> clienteRepository.save(cliente));
+    }
+
+    /**
+     * 🔥 Obtiene el historial de pedidos de un cliente desde order-service
+     * 
+     * @param clienteId ID del cliente
+     * @return Lista de pedidos del cliente
+     */
+    public List<PedidoDTO> obtenerPedidosPorCliente(Long clienteId) {
+        try {
+            return pedidoFeignClient.obtenerPedidosPorCliente(clienteId);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al consultar pedidos con order-service: " + e.getMessage());
+        }
     }
 }

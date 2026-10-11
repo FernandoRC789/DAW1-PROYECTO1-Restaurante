@@ -7,11 +7,16 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.cibertec.billing_service.client.CatalogoFeignClient;
 import com.cibertec.billing_service.client.ClienteRestConsumer;
+import com.cibertec.billing_service.client.MesaFeignClient;
 import com.cibertec.billing_service.client.OrderRestConsumer;
+import com.cibertec.billing_service.client.UsuarioFeignClient;
 import com.cibertec.billing_service.dto.CierreCajaDTO;
 import com.cibertec.billing_service.dto.ClienteDTO;
+import com.cibertec.billing_service.dto.ComidaDTO;
 import com.cibertec.billing_service.dto.ComprobanteDTO;
 import com.cibertec.billing_service.dto.ComprobanteResponseDTO;
 import com.cibertec.billing_service.dto.DetalleComprobanteDTO;
@@ -22,8 +27,6 @@ import com.cibertec.billing_service.repository.ComprobanteDePagoRepository;
 import com.cibertec.billing_service.repository.EstadoComprobanteRepository;
 import com.cibertec.billing_service.utilsEnum.MetodoPago;
 import com.cibertec.billing_service.utilsEnum.TipoComprobante;
-
-import jakarta.transaction.Transactional;
 
 /**
  * 📌 SERVICIO: ComprobantePagoService
@@ -41,14 +44,24 @@ public class ComprobantePagoService {
     private EstadoComprobanteRepository estadoRepo;
 
     @Autowired
-    private ClienteRestConsumer clienteRestConsumer; // 👈 Inyección de Feign Client
+    private ClienteRestConsumer clienteRestConsumer;
     
     @Autowired
     private OrderRestConsumer orderRestConsumer;
 
+    @Autowired
+    private MesaFeignClient mesaFeignClient;
+
+    @Autowired
+    private UsuarioFeignClient usuarioFeignClient;
+
+    @Autowired
+    private CatalogoFeignClient catalogoFeignClient;
+
     /**
      * 🔥 PROCESO PRINCIPAL: GENERAR COMPROBANTE
      */
+
     @Transactional
     public ComprobanteDePago crearComprobante(
             Long orderId,
@@ -78,20 +91,38 @@ public class ComprobantePagoService {
         comp.setEstado(estado);
         comp.setUserID(userId);
 
-        return comprobanteRepo.save(comp);
+        ComprobanteDePago comprobanteGuardado = comprobanteRepo.save(comp);
+
+        /*
+         * 🔥 LIBERAR MESA DESDE OPERATIONS-SERVICE
+         * 
+         * Cuando se genera un comprobante de pago, se debe liberar
+         * la mesa asociada al pedido para que pueda ser usada por otros clientes.
+         */
+        try {
+            PedidoDTO pedidoDTO = orderRestConsumer.obtenerPedidoPorId(orderId);
+            if (pedidoDTO != null && pedidoDTO.getMesaId() != null) {
+            	mesaFeignClient.actualizarEstadoMesa(pedidoDTO.getMesaId(), "LIBRE");
+            	}
+        } catch (Exception e) {
+            System.err.println("Error al liberar mesa: " + e.getMessage());
+        }
+
+        return comprobanteGuardado;
     }
 
     /**
-     * CREAR DESDE DTO
+     * CREAR DESDE DTO (Optimizado para evitar bloqueos de red en la BD)
      */
     @Transactional
     public ComprobanteDePago crearDesdeDTO(ComprobanteDTO dto) {
-
+    	try {
+    	// 1. Validaciones rápidas de negocio (Sin abrir transacción de BD aún)
         if (comprobanteRepo.existsByOrderId(dto.getPedidoId())) {
             throw new RuntimeException("El pedido con ID " + dto.getPedidoId() + " ya tiene comprobante");
         }
 
-        // 🔍 Validar cliente consultando por Feign Client si se envió un clienteId
+     // 2. Consultas externas por red (Feign Clients) - FUERA de la transacción pesada
         if (dto.getClienteId() != null) {
             try {
                 ClienteDTO clienteDTO = clienteRestConsumer.obtenerClientePorId(dto.getClienteId());
@@ -103,7 +134,6 @@ public class ComprobantePagoService {
             }
         }
         
-     // 🔍 1. Validar pedido y obtener su TOTAL real desde order-service
         PedidoDTO pedidoDTO;
         try {
             pedidoDTO = orderRestConsumer.obtenerPedidoPorId(dto.getPedidoId());
@@ -113,8 +143,21 @@ public class ComprobantePagoService {
         } catch (Exception e) {
             throw new RuntimeException("Error al comunicarse con order-service: " + e.getMessage());
         }
-        
 
+        // 3. Con los datos ya listos, llamamos a un método interno ultra-rápido que SÍ es transaccional
+        return ejecutarGuardadoYLiberacionMesa(dto, pedidoDTO);
+    	} catch (Exception e) {
+    		// 🔥 IMPRIME EL ERROR COMPLETO EN ROJO EN LA CONSOLA DE ECLIPSE
+            e.printStackTrace(); 
+            throw new RuntimeException("Error interno al generar comprobante: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Método auxiliar privado puramente transaccional para la Base de Datos
+     */
+    @Transactional
+    private ComprobanteDePago ejecutarGuardadoYLiberacionMesa(ComprobanteDTO dto, PedidoDTO pedidoDTO) {
         EstadoComprobante estado = estadoRepo.findByNombre("PAGADO")
                 .orElseThrow(() -> new RuntimeException("Estado PAGADO no configurado"));
 
@@ -125,14 +168,39 @@ public class ComprobantePagoService {
         comp.setMetodoPago(dto.getMetodoPago());
         comp.setEstado(estado);
         comp.setFechaEmision(LocalDateTime.now());
-        //comp.setUserID(dto.getUserId() != null ? dto.getUserId() : 1L);
-        //comp.setTotal(dto.getTotal());
-     // 💰 Asignar el total que viene directamente del order-service
         comp.setTotal(pedidoDTO.getTotal());
+        
+        // Generación de número usando nuestro bloqueo seguro (Bug 1)
         String numero = generarNumeroComprobante(dto.getTipoComprobante());
         comp.setNumero(numero);
 
-        return comprobanteRepo.save(comp);
+        ComprobanteDePago comprobanteGuardado = comprobanteRepo.save(comp);
+
+        // Liberar mesa en operations-service (llamada final rápida)
+        // 🛡️ LIBERACIÓN SEGURA AISLADA (Evita bucles y bloqueos de red)
+        try {
+            if (pedidoDTO != null && pedidoDTO.getMesaId() != null) {
+                // Hacemos la llamada directa sin reintentos infinitos
+                mesaFeignClient.actualizarEstadoMesa(pedidoDTO.getMesaId(), "LIBRE");
+            }
+        }catch (Exception e) {
+            // Si operations-service no responde, el pago YA SE GUARDÓ con éxito. 
+            // Solo dejamos un log en consola para auditoría, pero no rompemos la transacción del cajero.
+            System.err.println("⚠️ Advertencia: No se pudo liberar la mesa automáticamente: " + e.getMessage());
+        }
+
+     // 2. 🔥 ACTUALIZAR EL ESTADO DEL PEDIDO A PAGADO (ID 4) EN EL ORDER-SERVICE
+        try {
+            if (dto.getPedidoId() != null) {
+                // Asegúrate de tener este método en tu OrderRestConsumer (o OrderFeignClient)
+                orderRestConsumer.actualizarEstadoPedido(dto.getPedidoId(), 4L); 
+                System.out.println("✅ Pedido " + dto.getPedidoId() + " actualizado a estado PAGADO (4) exitosamente.");
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Advertencia: No se pudo actualizar el estado del pedido a PAGADO: " + e.getMessage());
+        }
+        
+        return comprobanteGuardado;
     }
 
     /**
@@ -160,36 +228,63 @@ public class ComprobantePagoService {
         }
         
      // 🍽️ B. Obtener platos/detalles del Pedido desde order-service
+        // y enriquecer con datos actualizados desde catalog-service (Blindado contra nulos)
         if (comp.getOrderId() != null) {
             try {
                 PedidoDTO pedidoDTO = orderRestConsumer.obtenerPedidoPorId(comp.getOrderId());
                 if (pedidoDTO != null && pedidoDTO.getDetalles() != null) {
                     List<DetalleComprobanteDTO> detalles = pedidoDTO.getDetalles().stream()
-                            .map(d -> new DetalleComprobanteDTO(
-                                    d.getNombreProducto(),
-                                    d.getCantidad(),
-                                    d.getPrecioUnitario()
-                            )).toList();
+                            .map(d -> {
+                            	// 🔥 IMPRIME ESTO EN LA CONSOLA DE ECLIPSE
+                                System.err.println("🔍 DEBUG DETALLE -> comidaId: " + d.getComidaId() + " | nombreTraido: " + d.getNombreProducto());
+                                
+                                // Valores por defecto seguros obtenidos del pedido original
+                                String nombreProducto = "Producto";
+                                BigDecimal precioUnitario = d.getPrecioUnitario() != null ? d.getPrecioUnitario() : BigDecimal.ZERO;
+                                int cantidad = d.getCantidad() > 0 ? d.getCantidad() : 1;
+                                
+                             // 2. Intentar enriquecer opcionalmente con catalog-service (sin romper si falla)
+                                try {
+                                    if (d.getComidaId() != null) {
+                                        ComidaDTO comidaDTO = catalogoFeignClient.obtenerComidaPorId(d.getComidaId());
+                                        if (comidaDTO != null) {
+                                            if (comidaDTO.getNombre() != null && !comidaDTO.getNombre().isBlank()) {
+                                                nombreProducto = comidaDTO.getNombre();
+                                            }
+                                            if (comidaDTO.getPrecioUni() != null) {
+                                                precioUnitario = comidaDTO.getPrecioUni();
+                                            }
+                                        }
+                                    }
+                                } catch (Exception ex) {
+                                    // Si el catálogo falla, conservamos con seguridad los datos que ya traía el pedido
+                                    System.err.println("Aviso: No se pudo consultar catalog-service, usando datos del pedido: " + ex.getMessage());
+                                }
+                                
+                                return new DetalleComprobanteDTO(
+                                        nombreProducto,
+                                        cantidad,
+                                        precioUnitario
+                                );
+                            }).toList();
                     dto.setDetalles(detalles);
                 }
             } catch (Exception e) {
-                // Si falla la consulta de detalles
+                System.err.println("Error al obtener detalles del pedido para el comprobante: " + e.getMessage());
             }
         }
-        
-
         return dto;
-        
-   
     }
 
     /**
      * 🔢 Generador de número SUNAT
      */
+    @Transactional
     public String generarNumeroComprobante(TipoComprobante tipo) {
         String prefijo = (tipo == TipoComprobante.BOLETA) ? "B001" : "F001";
 
-        ComprobanteDePago ultimo = comprobanteRepo.findTopByTipoComprobanteOrderByIdComprobantePagoDesc(tipo);
+        // 🔥 Aquí usamos el método con bloqueo pesimista para evitar colisiones entre cajeros
+        ComprobanteDePago ultimo = comprobanteRepo.findUltimoPorTipoConBloqueo(tipo);
 
         int numero = 1;
         if (ultimo != null && ultimo.getNumero() != null) {

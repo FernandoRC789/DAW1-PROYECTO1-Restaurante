@@ -54,7 +54,7 @@ public class Categoria {
 	 * 🔥 IMPORTANTE: - mappedBy indica que la relación es controlada por Comida
 	 * - @JsonIgnore evita recursividad infinita en JSON
 	 */
-	@OneToMany(mappedBy = "categoriaid")
+	@OneToMany(mappedBy = "categoria")
 	@JsonIgnore // 🔥 ESTA ES LA CLAVE
 	private List<Comida> comidas;
 

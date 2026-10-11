@@ -15,7 +15,7 @@
            style="cursor:pointer"
            [class.border-primary]="pedidoSeleccionado?.idPedido === p.idPedido">
 
-        <strong>🧾 Mesa {{ p.mesa?.numero }}</strong>
+        <strong>🧾 Mesa {{ p.mesaNumero }}</strong>
 
         <div>Total: S/ {{ getTotal(p) }}</div>
 
@@ -32,7 +32,7 @@
 
         <div class="card p-3">
 
-          <p><b>Mesa:</b> {{ pedidoSeleccionado.mesa?.numero }}</p>
+          <p><b>Mesa:</b> {{ pedidoSeleccionado.mesaNumero }}</p>
           <p><b>Total:</b> S/ {{ pedidoSeleccionado.total }}</p>
 
           <!-- tipo comprobante -->

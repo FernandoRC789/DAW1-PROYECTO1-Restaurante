@@ -99,9 +99,11 @@ loadingPedidos = true;
           this.loadingPedidos = false;
 
         // SOLO pedidos listos (cajero trabaja solo con esto)
-        this.pedidos = data.filter(p =>
-          this.normalizarEstado(p.estado?.nombre) === 'LISTO'
-        );
+        this.pedidos = data.filter(p =>{
+          const estado = this.normalizarEstado(p.estadoNombre);
+// 🔥 DEBE ser estrictamente 'LISTO' y NO estar pagado/anulado
+          return estado === 'LISTO' && p.estadoId !== 4;
+      });
 
         // 🔥 si el pedido seleccionado ya no existe, se limpia
         if (this.pedidoSeleccionado) {

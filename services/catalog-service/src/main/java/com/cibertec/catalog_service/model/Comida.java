@@ -78,7 +78,7 @@ public class Comida {
 	@JoinColumn(name = "cat_id")
 	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 
-	private Categoria categoriaid;
+	private Categoria categoria;
 
 	/**
 	 * 💰 Precio unitario
@@ -124,7 +124,7 @@ public class Comida {
 		this.idComida = idComida;
 		this.nombre = nombre;
 		this.descripcion = descripcion;
-		this.categoriaid = categoriaid;
+		this.categoria = categoriaid;
 		this.precioUni = precioUni;
 		this.disponible = disponible;
 	}
@@ -153,12 +153,12 @@ public class Comida {
 		this.descripcion = descripcion;
 	}
 
-	public Categoria getCategoriaid() {
-		return categoriaid;
+	public Categoria getCategoria() {
+		return categoria;
 	}
 
-	public void setCategoriaid(Categoria categoriaid) {
-		this.categoriaid = categoriaid;
+	public void setCategoria(Categoria categoriaid) {
+		this.categoria = categoriaid;
 	}
 
 	public BigDecimal getPrecioUni() {

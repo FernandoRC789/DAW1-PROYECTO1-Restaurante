@@ -4,7 +4,10 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.cibertec.operations_service.client.PedidoFeignClient;
+import com.cibertec.operations_service.dto.PedidoDTO;
 import com.cibertec.operations_service.model.Mesa;
 import com.cibertec.operations_service.repository.MesaRepository;
 import com.cibertec.operations_service.utilsEnum.EstadoMesa;
@@ -25,6 +28,9 @@ public class MesaService {
 
 	@Autowired
 	private MesaRepository mesaRepository;
+
+	@Autowired
+	private PedidoFeignClient pedidoFeignClient;
 	
     /**
      * ✅ Lista todas las mesas del sistema
@@ -51,6 +57,7 @@ public class MesaService {
      * 🔥 Reglas aplicadas:
      * - Si no tiene estado → se asigna LIBRE por defecto
      */
+	@Transactional
 	public Mesa guardar(Mesa mesa) {
 
 	    // 🔥 SI ES UPDATE (ya tiene ID)
@@ -79,6 +86,7 @@ public class MesaService {
      * 🔥 Mejora:
      * - Verifica que exista antes de eliminar
      */
+	@Transactional
 	public void eliminar(Long id) {
 	    Mesa mesa = mesaRepository.findById(id)
 	            .orElseThrow(() -> new RuntimeException("Mesa no existe"));
@@ -98,6 +106,7 @@ public class MesaService {
      * @param estado nuevo estado (LIBRE, OCUPADO, etc.)
      * @return Mesa actualizada
      */
+    @Transactional
     public Mesa cambiarEstado(Long id, EstadoMesa estado) {
 
         Mesa mesa = mesaRepository.findById(id)
@@ -106,5 +115,19 @@ public class MesaService {
         mesa.setEstado_mesa(estado);
 
         return mesaRepository.save(mesa);
+    }
+
+    /**
+     * 🔥 Obtiene los pedidos activos de una mesa desde order-service
+     * 
+     * @param mesaId ID de la mesa
+     * @return Lista de pedidos activos de la mesa
+     */
+    public List<PedidoDTO> obtenerPedidosPorMesa(Long mesaId) {
+        try {
+            return pedidoFeignClient.obtenerPedidosPorMesa(mesaId);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al consultar pedidos con order-service: " + e.getMessage());
+        }
     }
 }

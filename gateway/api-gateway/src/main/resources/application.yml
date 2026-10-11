@@ -8,7 +8,22 @@ spring:
     gateway:
       discovery:
         locator:
-          enabled: true # Permite descubrir automáticamente los servicios registrados en Eureka
+          enabled: true
+      # --- CONFIGURACIÓN DE CORS PARA ANGULAR ---
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+      # ------------------------------------------
       routes:
         # 1. Ruta para el microservicio de Autenticación y Seguridad
         - id: auth-service-route
@@ -16,35 +31,48 @@ spring:
           predicates:
             - Path=/api/auth/**
 
-        # 2. Ruta para el microservicio de Facturación / Cobros
+        # 2. Ruta para el microservicio de Usuarios
+        - id: users-service-route
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/usuarios/**
+
+        # 3. Ruta para el microservicio de Facturación / Cobros
         - id: billing-service-route
           uri: lb://billing-service
           predicates:
-            - Path=/api/billing/**
+            - Path=/api/comprobantes/**
 
-        # 3. Ruta para el microservicio de Operaciones
+        # 4. Ruta para el microservicio de Operaciones (Mesas)
         - id: operations-service-route
           uri: lb://operations-service
           predicates:
-            - Path=/api/operations/**
+            - Path=/api/mesas/**
 
-        # 4. Ruta para el microservicio de Catálogo
-        - id: catalog-service-route
+        # 5. Ruta para el microservicio de Catálogo (Comidas y Categorías)
+        # 5.1. Ruta para el Catálogo (Categorías)
+        - id: categorias-service-route
           uri: lb://catalog-service
           predicates:
-            - Path=/api/catalog/**
+            - Path=/api/categorias/**
 
-        # 5. Ruta para el microservicio de Clientes
-        - id: customers-service-route
-          uri: lb://customers-service
+        # 5.2. Ruta para el Catálogo (Comidas)
+        - id: comidas-service-route
+          uri: lb://catalog-service
           predicates:
-            - Path=/api/customers/**
+            - Path=/api/comidas/**
 
-        # 6. Ruta para el microservicio de Pedidos / Órdenes
+        # 6. Ruta para el microservicio de Clientes
+        - id: customers-service-route
+          uri: lb://customer-service
+          predicates:
+            - Path=/api/clientes/**
+
+        # 7. Ruta para el microservicio de Pedidos / Órdenes
         - id: order-service-route
           uri: lb://order-service
           predicates:
-            - Path=/api/order/**
+            - Path=/api/pedidos/**
 
 eureka:
   client:

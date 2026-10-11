@@ -1,17 +1,18 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { PedidoDTO } from "../models/pedido.model";
+import { API_ROUTES } from "../config/api.config";
 
 @Injectable({ providedIn: 'root' })
 export class PedidoService {
 
-  private apiUrl = 'http://localhost:8081/api/pedidos';
+  private apiUrl = API_ROUTES.PEDIDOS;
 
   constructor(private http: HttpClient) {}
 
   // 🧾 CREAR PEDIDO
   crear(dto: PedidoDTO) {
-    return this.http.post(`${this.apiUrl}/nuevo`, dto);
+    return this.http.post(`${this.apiUrl}`, dto);
   }
 
   misPedidos() {
@@ -28,7 +29,7 @@ export class PedidoService {
   }
 
 cambiarEstado(id: number, estadoId: number) {
-  return this.http.patch(
+  return this.http.put(
     `${this.apiUrl}/${id}/estado?estadoId=${estadoId}`,
     {}
   );

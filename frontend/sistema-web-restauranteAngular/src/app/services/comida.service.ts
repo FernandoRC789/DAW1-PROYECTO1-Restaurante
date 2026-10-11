@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_ROUTES } from '../config/api.config';
 
 export interface Comida {
   idComida: number;
   nombre: string;
-  descripcion: string; // 🔥 AGREGAR
+  descripcion: string;
   precioUni: number;
   disponible: boolean;
-  categoria: any; // puedes tiparlo luego como Categoria
+  categoria: any;
 }
 
 @Injectable({
@@ -16,7 +17,7 @@ export interface Comida {
 })
 export class ComidaService {
 
-  private apiUrl = 'http://localhost:8081/api/comidas';
+  private apiUrl = API_ROUTES.COMIDAS;
 
   constructor(private http: HttpClient) {}
 

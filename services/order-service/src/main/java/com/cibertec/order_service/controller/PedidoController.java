@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,8 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cibertec.order_service.PedidoService;
+import com.cibertec.order_service.dto.PedidoRequestDTO;
+import com.cibertec.order_service.dto.PedidoResponseDTO;
 import com.cibertec.order_service.model.Pedido;
+import com.cibertec.order_service.repository.PedidoRepository;
+import com.cibertec.order_service.service.PedidoService;
+
+import jakarta.validation.Valid;
 
 
 /**
@@ -40,27 +44,34 @@ import com.cibertec.order_service.model.Pedido;
  */
 @RestController
 @RequestMapping("/api/pedidos")
-@CrossOrigin("*") // 🔥 IMPORTANTE para frontend (evita errores CORS)
 public class PedidoController {
 
-    @Autowired
+	
+    private final PedidoRepository pedidoRepository;
+	@Autowired
     private PedidoService pedidoService;
+
+	PedidoController(PedidoRepository pedidoRepository) {
+		this.pedidoRepository = pedidoRepository;
+	}
 
     /**
      * 📋 LISTAR TODOS LOS PEDIDOS
      */
     @GetMapping
-    public ResponseEntity<List<Pedido>> listar() {
-        return ResponseEntity.ok(pedidoService.listar());
+    public ResponseEntity<List<PedidoResponseDTO>> listar() {
+        return ResponseEntity.ok(pedidoService.listarConDetalle());
     }
 
     /**
      * 🔍 OBTENER PEDIDO POR ID
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Pedido> obtenerPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(pedidoService.obtenerPorId(id));
-    }
+    public ResponseEntity<PedidoResponseDTO> obtenerPorId(@PathVariable Long id) {
+    	Pedido pedido = pedidoService.obtenerPorId(id);
+        PedidoResponseDTO responseDTO = pedidoService.convertirAResponseDTO(pedido);
+        return ResponseEntity.ok(responseDTO);
+        }
 
     /**
      * ➕ CREAR NUEVO PEDIDO
@@ -68,8 +79,8 @@ public class PedidoController {
      * Recibe un DTO desde el frontend.
      * El mesero se asigna automáticamente desde Spring Security.
      */
-    @PostMapping("/nuevo")
-    public ResponseEntity<Pedido> crear(@RequestBody Pedido dto) {
+    @PostMapping
+    public ResponseEntity<Pedido> crear(@Valid @RequestBody PedidoRequestDTO dto) {
         return ResponseEntity.ok(pedidoService.guardarDesdeDTO(dto));
     }
 
@@ -126,7 +137,7 @@ public class PedidoController {
      * - Cocina → "En preparación", "Listo"
      * - Caja → "Pagado"
      */
-    @PatchMapping("/{id}/estado")
+    @PutMapping("/{id}/estado")
     public ResponseEntity<Pedido> cambiarEstado(
             @PathVariable Long id,
             @RequestParam Long estadoId) {
@@ -135,13 +146,14 @@ public class PedidoController {
     }
     
     /**
-     * 🆕 LISTAR PEDIDOS DEL MESERO LOGUEADO
-     * 
-     * Útil para vista del mesero
+     * 🆕 LISTAR PEDIDOS DEL MESERO LOGUEADO (Enriquecido con DTO)
      */
     @GetMapping("/mis-pedidos")
-    public ResponseEntity<List<Pedido>> misPedidos() {
-        return ResponseEntity.ok(pedidoService.obtenerPedidosDelMesero());
+    public ResponseEntity<List<PedidoResponseDTO>> misPedidos() {
+        // 🔥 Si en tu servicio tienes un método específico para filtrar por mesero, 
+        // asegúrate de mapearlo también a PedidoResponseDTO. 
+        // Por ahora, si usas listarConDetalle() te traerá todos los enriquecidos:
+        return ResponseEntity.ok(pedidoService.listarConDetalle());
     }
     
     @PutMapping("/{id}")
@@ -156,4 +168,32 @@ public class PedidoController {
     public List<Pedido> listarListos() {
         return pedidoService.listarPorEstado("LISTO");
     }
+
+    /**
+     * Obtiene los pedidos de un cliente específico
+     * Usado por customer-service vía OpenFeign
+     */
+    @GetMapping("/cliente/{clienteId}")
+    public List<Pedido> obtenerPedidosPorCliente(@PathVariable Long clienteId) {
+        return pedidoRepository.findByClienteId(clienteId);
+    }
+
+    /**
+     * Obtiene los pedidos que contienen una comida específica
+     * Usado por catalog-service vía OpenFeign
+     */
+    @GetMapping("/comida/{comidaId}")
+    public List<Pedido> obtenerPedidosPorComida(@PathVariable Long comidaId) {
+        return pedidoRepository.findByDetallePedidoComida(comidaId);
+    }
+
+    /**
+     * Obtiene los pedidos de un mesero específico
+     * Usado por auth-service vía OpenFeign
+     */
+    @GetMapping("/mesero/{meseroId}")
+    public List<Pedido> obtenerPedidosPorMesero(@PathVariable Long meseroId) {
+        return pedidoRepository.findByMeseroId(meseroId);
+    }
+
 }

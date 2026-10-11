@@ -48,14 +48,14 @@ public class Pedido {
      */
 	@NotNull(message = "Selecciona un estado")
 	@Column(name = "id_estado")
-	private Long estadoid;
+	private Long estadoId;
 	
 	 /**
      * 🍽️ Mesa asociada al pedido
      */
 	@NotNull(message = "Selecciona una mesa")
 	@Column(name = "id_mesa")
-	private Long mesaid;
+	private Long mesaId;
 	
     /**
      * 📅 Fecha del pedido
@@ -85,7 +85,13 @@ public class Pedido {
      * 👨‍🍳 Mesero que registró el pedido
      */
 	@Column(name = "id_mesero")
-	private Long meseroid;
+	private Long meseroId;
+
+    /**
+     * 👤 Cliente asociado al pedido (opcional)
+     */
+	@Column(name = "id_cliente")
+	private Long clienteId;
 	
     // =========================
     // 🔥 LÓGICA AUTOMÁTICA
@@ -138,12 +144,12 @@ public class Pedido {
 		super();
 		this.idPedido = idPedido;
 		this.detallePedido = detallePedido;
-		this.estadoid = estadoid;
-		this.mesaid = mesaid;
+		this.estadoId = estadoid;
+		this.mesaId = mesaid;
 		this.fechaRegistrada = fechaRegistrada;
 		this.observaciones = observaciones;
 		this.total = total;
-		this.meseroid = meseroid;
+		this.meseroId = meseroid;
 	}
 
 	public Long getIdPedido() {
@@ -162,21 +168,40 @@ public class Pedido {
 		this.detallePedido = detallePedido;
 	}
 
-	public Long getEstadoid() {
-		return estadoid;
+	public Long getEstadoId() {
+		return estadoId;
 	}
 
-	public void setEstadoid(Long estadoid) {
-		this.estadoid = estadoid;
+	public void setEstadoId(Long estadoid) {
+		this.estadoId = estadoid;
 	}
 
-	public Long getMesaid() {
-		return mesaid;
+	public Long getMesaId() {
+		return mesaId;
 	}
 
-	public void setMesaid(Long mesaid) {
-		this.mesaid = mesaid;
+	public void setMesaId(Long mesaid) {
+		this.mesaId = mesaid;
 	}
+
+	/**
+	 * 🔥 Getter compatible con PedidoDTO de billing-service
+	 */
+
+	/**
+	 * 🔥 Getter compatible con PedidoDTO de billing-service
+	 * Devuelve el ID del estado como String
+	 */
+
+	/**
+	 * 🔥 Getter compatible con PedidoDTO de billing-service
+	 * Devuelve el ID del estado como String
+	 */
+
+	/**
+	 * 🔥 Getter compatible con PedidoDTO de billing-service
+	 * Devuelve el ID del estado como String
+	 */
 
 	public LocalDate getFechaRegistrada() {
 		return fechaRegistrada;
@@ -202,19 +227,21 @@ public class Pedido {
 		this.total = total;
 	}
 
-	public Long getMeseroid() {
-		return meseroid;
+	public Long getMeseroId() {
+		return meseroId;
 	}
 
-	public void setMeseroid(Long meseroid) {
-		this.meseroid = meseroid;
+	public void setMeseroId(Long meseroid) {
+		this.meseroId = meseroid;
 	}
 
-	// =========================
-    // GETTERS / SETTERS
-    // =========================
-	
-	
+	public Long getClienteId() {
+		return clienteId;
+	}
+
+	public void setClienteId(Long clienteid) {
+		this.clienteId = clienteid;
+	}
 }
 
 

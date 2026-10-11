@@ -28,13 +28,13 @@
     <tbody>
       <tr *ngFor="let p of pedidosPaginados">
         <td>{{ p.idPedido }}</td>
-        <td>{{ p.mesa?.numero }}</td>
+        <td>{{ p.mesaNumero }}</td>
         <td>{{ p.fechaRegistrada }}</td>
 
         <td>
-          <span class="badge" [ngClass]="getColorEstado(p.estado)">
-            {{ p.estado?.nombre }}
-          </span>
+        <span class="badge" [ngClass]="getColorEstado(p)">
+          {{ p.estadoNombre }}
+        </span>
         </td>
 
         <td>S/ {{ p.total }}</td>

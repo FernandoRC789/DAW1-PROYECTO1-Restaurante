@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cibertec.customer_service.dto.PedidoDTO;
 import com.cibertec.customer_service.model.Cliente;
 import com.cibertec.customer_service.service.ClienteService;
 
 @RestController
 @RequestMapping("/api/clientes")
-@CrossOrigin(origins = "*")
 public class ClienteController {
 
     private final ClienteService clienteService;
@@ -54,7 +54,7 @@ public class ClienteController {
     /**
      * Endpoint conservado del monolito para no romper el contrato actual del frontend.
      */
-    @PostMapping("/nuevo")
+    @PostMapping
     public ResponseEntity<Cliente> crear(@Valid @RequestBody Cliente cliente) {
         return ResponseEntity.status(HttpStatus.CREATED).body(clienteService.crear(cliente));
     }
@@ -62,7 +62,7 @@ public class ClienteController {
     /**
      * Alias REST convencional.
      */
-    @PostMapping
+    @PostMapping("/convencional")
     public ResponseEntity<Cliente> crearConvencional(@Valid @RequestBody Cliente cliente) {
         return ResponseEntity.status(HttpStatus.CREATED).body(clienteService.crear(cliente));
     }
@@ -78,6 +78,20 @@ public class ClienteController {
     public ResponseEntity<MapResponse> eliminar(@PathVariable Long id) {
         clienteService.eliminar(id);
         return ResponseEntity.ok(new MapResponse("Cliente eliminado correctamente"));
+    }
+
+    /**
+     * 🔥 NUEVO: OBTENER HISTORIAL DE PEDIDOS DE UN CLIENTE
+     * 
+     * Ejemplo:
+     * GET /api/clientes/1/pedidos
+     * 
+     * @param id ID del cliente
+     * @return Lista de pedidos del cliente
+     */
+    @GetMapping("/{id}/pedidos")
+    public ResponseEntity<List<PedidoDTO>> obtenerPedidosPorCliente(@PathVariable Long id) {
+        return ResponseEntity.ok(clienteService.obtenerPedidosPorCliente(id));
     }
 
     /**

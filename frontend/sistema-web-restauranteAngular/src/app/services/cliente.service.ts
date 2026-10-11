@@ -2,12 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Cliente } from '../models/cliente.model';
 import { Observable } from 'rxjs';
+import { API_ROUTES } from '../config/api.config';
 
 
 @Injectable({ providedIn: 'root' })
 export class ClienteService {
 
-  private api = 'http://localhost:8081/api/clientes';
+  private api = API_ROUTES.CLIENTES;
 
   constructor(private http: HttpClient) {}
 
@@ -18,7 +19,7 @@ export class ClienteService {
 
   // ➕ crear cliente
   crear(cliente: Cliente):  Observable<Cliente>{
-    return this.http.post<Cliente>(`${this.api}/nuevo`, cliente);
+    return this.http.post<Cliente>(`${this.api}`, cliente);
   }
 
   // ✏️ actualizar cliente

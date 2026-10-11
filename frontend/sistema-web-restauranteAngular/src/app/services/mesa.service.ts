@@ -2,11 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Mesa } from '../models/mesa.model';
+import { API_ROUTES } from '../config/api.config';
 
 @Injectable({ providedIn: 'root' })
 export class MesaService {
 
-  private apiUrl = 'http://localhost:8081/api/mesas';
+  private apiUrl = API_ROUTES.MESAS;
 
   constructor(private http: HttpClient) {}
 
@@ -15,7 +16,7 @@ export class MesaService {
   }
 
   crear(mesa: Mesa): Observable<Mesa> {
-    return this.http.post<Mesa>(`${this.apiUrl}/nuevo`, mesa);
+    return this.http.post<Mesa>(`${this.apiUrl}`, mesa);
   }
 
   actualizar(id: number, mesa: Mesa): Observable<Mesa> {

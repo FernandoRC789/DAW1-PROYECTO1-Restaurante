@@ -8,42 +8,45 @@
 
   <option value="TODOS">Todos</option>
   <option value="PENDIENTE">Pendiente</option>
-  <option value="EN PROCESO">En proceso</option>
+  <option value="EN_COCINA">En proceso</option>
   <option value="LISTO">Listo</option>
 
 </select>
 <br>
 
-  <div *ngFor="let p of pedidos" class="card mb-3 p-3">
+<div *ngFor="let p of pedidos" class="card mb-3 p-3 shadow-sm">
 
-  <h5>🍽️ Mesa {{ p.mesa?.numero }}</h5>
+<!-- ✅ Mesa enriquecida desde el backend -->
+  <h5>🍽️ Mesa {{ p.mesaNumero }}</h5>
 
-  <span class="badge bg-primary">
-    {{ p.estado?.nombre }}
-  </span>
+<!-- ✅ Estado enriquecido desde el backend -->
+    <span class="badge" [ngClass]="getColor(p.estadoNombre)">
+      {{ p.estadoNombre }}
+    </span>
 
   <hr>
 
   <h6>🧾 Pedido:</h6>
 
-  <ul>
-    <li *ngFor="let d of p.detallePedido">
-      {{ d.comida.nombre }} x {{ d.cantidad }}
-    </li>
-  </ul>
+    <ul>
+      <!-- ✅ Nombre de la comida enriquecido desde el backend -->
+      <li *ngFor="let d of p.detallePedido">
+        {{ d.comidaNombre }} x {{ d.cantidad }}
+      </li>
+    </ul>
 
   <div class="mt-2">
-<button class="btn btn-warning btn-sm"
-        [disabled]="p.estado?.nombre !== 'PENDIENTE'"
-        (click)="cambiarEstadoPedido(p.idPedido, 2)">
-  🔥 En preparación
-</button>
+  <button class="btn btn-warning btn-sm me-2"
+          [disabled]="p.estadoNombre !== 'PENDIENTE'"
+          (click)="cambiarEstadoPedido(p.idPedido, 2)">
+    🔥 En preparación
+  </button>
 
-<button class="btn btn-success btn-sm"
-        [disabled]="p.estado?.nombre !== 'EN PROCESO'"
-        (click)="cambiarEstadoPedido(p.idPedido, 3)">
-  ✔ Listo
-</button>
+      <button class="btn btn-success btn-sm"
+              [disabled]="p.estadoNombre !== 'EN_COCINA'"
+              (click)="cambiarEstadoPedido(p.idPedido, 3)">
+        ✔ Listo
+      </button>
 
   </div>
 </div>

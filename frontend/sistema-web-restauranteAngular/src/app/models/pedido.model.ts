@@ -7,5 +7,5 @@ export interface PedidoDTO {
   estadoId: number;
   mesaId: number;
   observaciones?: string;
-  detalle: DetallePedidoDTO[];
+  detallePedido: DetallePedidoDTO[];
 }

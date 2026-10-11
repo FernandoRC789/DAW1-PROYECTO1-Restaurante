@@ -43,7 +43,7 @@ public interface ComidaRepository extends JpaRepository<Comida, Long>{
      * ✅ Buscar por Categoria
      * 
      */
-    List<Comida> findByCategoriaid_IdCat(Long idCategoria);
+    List<Comida> findByCategoria_IdCat(Long idCategoria);
     
     /**
      * ✅ Buscar por Nombre
@@ -55,12 +55,12 @@ public interface ComidaRepository extends JpaRepository<Comida, Long>{
      * ✅ Solo disponibles por Categorias
      * 
      */
-    List<Comida> findByCategoriaid_IdCatAndDisponibleTrue(Long idCategoria);
+    List<Comida> findByCategoria_IdCatAndDisponibleTrue(Long idCategoria);
     
     /**
      * 🏷️ Buscar por categoría
      */
-    List<Comida> findByCategoriaid(Categoria categoria);
+    List<Comida> findByCategoria(Categoria categoria);
 }
 
 

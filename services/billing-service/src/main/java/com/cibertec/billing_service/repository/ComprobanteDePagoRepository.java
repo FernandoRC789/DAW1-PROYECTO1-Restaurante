@@ -6,13 +6,15 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
 
 import com.cibertec.billing_service.model.ComprobanteDePago;
 import com.cibertec.billing_service.utilsEnum.MetodoPago;
 import com.cibertec.billing_service.utilsEnum.TipoComprobante;
+
+import jakarta.persistence.LockModeType;
 
 /**
  * 📌 REPOSITORIO: ComprobantePagoRepository
@@ -130,4 +132,9 @@ public interface ComprobanteDePagoRepository extends JpaRepository<ComprobanteDe
         AND c.estado.nombre = 'PAGADO'
     """)
     List<ComprobanteDePago> findByFecha(@Param("fecha") LocalDate fecha);
+    
+ // Dentro de tu interfaz ComprobanteDePagoRepository:
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT c FROM ComprobanteDePago c WHERE c.tipoComprobante = :tipo ORDER BY c.idComprobantePago DESC LIMIT 1")
+    ComprobanteDePago findUltimoPorTipoConBloqueo(@Param("tipo") TipoComprobante tipo);
 }

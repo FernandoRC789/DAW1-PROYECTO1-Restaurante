@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 import com.cibertec.catalog_service.model.Categoria;
-import com.cibertec.catalog_service.servic.CategoriaService;
+import com.cibertec.catalog_service.service.CategoriaService;
 
 /**
  * 📌 CONTROLADOR: CategoriaController
@@ -25,10 +27,6 @@ import com.cibertec.catalog_service.servic.CategoriaService;
  */
 @RestController
 @RequestMapping("/api/categorias")
-@CrossOrigin(
-	    origins = "http://localhost:4200",
-	    allowCredentials = "true"
-	)
 public class CategoriaController {
 	
 	@Autowired
@@ -61,7 +59,7 @@ public class CategoriaController {
      * 🔥 RECOMENDACIÓN: usar ruta base POST (no /nuevo)
      */
 	@PostMapping
-    public ResponseEntity<Categoria> crear(@RequestBody Categoria categoria) {
+    public ResponseEntity<Categoria> crear(@Valid @RequestBody Categoria categoria) {
         Categoria nueva = categoriaService.guardar(categoria);
         return ResponseEntity.status(201).body(nueva);
     }

@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
+import com.cibertec.operations_service.dto.PedidoDTO;
 import com.cibertec.operations_service.model.Mesa;
 import com.cibertec.operations_service.service.MesaService;
 import com.cibertec.operations_service.utilsEnum.EstadoMesa;
@@ -32,7 +35,6 @@ import com.cibertec.operations_service.utilsEnum.EstadoMesa;
  */
 @RestController
 @RequestMapping("/api/mesas")
-@CrossOrigin("*") // 🔥 Permite llamadas desde frontend (JS, HTML)
 public class MesaController {
 
 	@Autowired
@@ -60,7 +62,7 @@ public class MesaController {
      * 🔥 CAMBIO: quitamos "/nuevo" para seguir REST estándar
      */	
     @PostMapping
-     public ResponseEntity<Mesa> crear(@RequestBody Mesa mesa) {
+     public ResponseEntity<Mesa> crear(@Valid @RequestBody Mesa mesa) {
          return ResponseEntity.ok(mesaService.guardar(mesa));
      }
 	
@@ -86,13 +88,27 @@ public class MesaController {
      * 🔥 NUEVO: CAMBIAR ESTADO DE MESA
      * 
      * Ejemplo:
-     * PATCH /api/mesas/1/estado?estado=OCUPADO
+     * PUT /api/mesas/1/estado?estado=OCUPADO
      */
-    @PatchMapping("/{id}/estado")
+    @PutMapping("/{id}/estado")
     public ResponseEntity<Mesa> cambiarEstado(
             @PathVariable Long id,
             @RequestParam EstadoMesa estado) {
 
         return ResponseEntity.ok(mesaService.cambiarEstado(id, estado));
+    }
+
+    /**
+     * 🔥 NUEVO: OBTENER PEDIDOS ACTIVOS DE UNA MESA
+     * 
+     * Ejemplo:
+     * GET /api/mesas/1/pedidos
+     * 
+     * @param id ID de la mesa
+     * @return Lista de pedidos activos de la mesa
+     */
+    @GetMapping("/{id}/pedidos")
+    public ResponseEntity<List<PedidoDTO>> obtenerPedidosPorMesa(@PathVariable Long id) {
+        return ResponseEntity.ok(mesaService.obtenerPedidosPorMesa(id));
     }
 }

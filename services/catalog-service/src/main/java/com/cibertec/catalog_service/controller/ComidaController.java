@@ -16,8 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
+import com.cibertec.catalog_service.dto.PedidoDTO;
 import com.cibertec.catalog_service.model.Comida;
-import com.cibertec.catalog_service.servic.ComidaService;
+import com.cibertec.catalog_service.service.ComidaService;
 
 /**
  * 📌 CONTROLADOR: ComidaController
@@ -31,7 +34,6 @@ import com.cibertec.catalog_service.servic.ComidaService;
  */
 @RestController
 @RequestMapping("/api/comidas")
-@CrossOrigin("*")
 public class ComidaController {
 
     @Autowired
@@ -63,8 +65,8 @@ public class ComidaController {
      * 🔥 NOTA:
      * Ya no uses "/nuevo", usa REST estándar
      */
-    @PostMapping("/nuevo")
-    public ResponseEntity<Comida> crear(@RequestBody Comida comida) {
+    @PostMapping
+    public ResponseEntity<Comida> crear(@Valid @RequestBody Comida comida) {
         Comida nueva = comidaService.guardar(comida);
         return ResponseEntity.status(201).body(nueva);
     }
@@ -133,6 +135,20 @@ public class ComidaController {
     @GetMapping("/categoria/{idCat}")
     public ResponseEntity<List<Comida>> buscarPorCategoria(@PathVariable Long idCat) {
         return ResponseEntity.ok(comidaService.buscarPorCategoria(idCat));
+    }
+
+    /**
+     * 🔥 NUEVO: OBTENER PEDIDOS QUE CONTIENEN UNA COMIDA
+     * 
+     * Ejemplo:
+     * GET /api/comidas/1/pedidos
+     * 
+     * @param id ID de la comida
+     * @return Lista de pedidos que contienen la comida
+     */
+    @GetMapping("/{id}/pedidos")
+    public ResponseEntity<List<PedidoDTO>> obtenerPedidosPorComida(@PathVariable Long id) {
+        return ResponseEntity.ok(comidaService.obtenerPedidosPorComida(id));
     }
 }
 
