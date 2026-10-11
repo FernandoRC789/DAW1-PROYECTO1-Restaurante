@@ -73,8 +73,9 @@ export class MeseroHistorialComponent implements OnInit {
   }
 
   // 🎨 COLOR ESTADO
-  getColorEstado(estado: any) {
-    const nombre = estado?.nombre || '';
+  getColorEstado(p: any) {
+    if (!p) return 'bg-secondary'; // 👈 Si el objeto no existe todavía, retorna un color por defecto
+    const nombre = p.estadoNombre || '';
 
     switch (nombre) {
       case 'PENDIENTE': return 'bg-warning';
@@ -88,6 +89,8 @@ export class MeseroHistorialComponent implements OnInit {
 
   // 🔒 SOLO ACTIVOS EDITABLES
   puedeEditar(p: any) {
+    if (!p) return false; // 👈 Si no hay objeto, no se puede editar
+    const nombre = p.estadoNombre || '';
     return p.estado?.nombre !== 'CANCELADO'
         && p.estado?.nombre !== 'PAGADO';
   }

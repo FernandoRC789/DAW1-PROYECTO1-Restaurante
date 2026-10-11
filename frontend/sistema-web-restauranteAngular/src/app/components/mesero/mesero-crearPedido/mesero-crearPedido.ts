@@ -165,7 +165,7 @@ crearPedido() {
     mesaId: this.mesaSeleccionada!.idMesa,
     observaciones: this.observaciones, // 🔥 usa tu variable
 
-    detalle: this.carrito.map(i => ({
+    detallePedido: this.carrito.map(i => ({
         comidaId: i.comida.idComida,
         cantidad: i.cantidad
     }))

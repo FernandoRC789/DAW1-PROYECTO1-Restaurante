@@ -8,7 +8,10 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.cibertec.auth_service.client.PedidoFeignClient;
+import com.cibertec.auth_service.dto.PedidoDTO;
 import com.cibertec.auth_service.dto.UserCreateDTO;
 import com.cibertec.auth_service.dto.UserResponseDTO;
 import com.cibertec.auth_service.dto.UserUpdateDTO;
@@ -35,6 +38,9 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private PedidoFeignClient pedidoFeignClient;
     
     /**
      * 🔄 Método privado para mapear de Entidad User a UserResponseDTO (Clean Code)
@@ -74,6 +80,7 @@ public class UserService {
     /**
      * ➕ Crear usuario con roles
      */
+    @Transactional
     public UserResponseDTO crearUsuario(UserCreateDTO dto) {
 
         if (userRepository.existsByUsername(dto.getUsername())) {
@@ -103,11 +110,30 @@ public class UserService {
 
     /**
      * ❌ Eliminar usuario
+     * 
+     * 🔥 Validación: No se puede eliminar un mesero que tiene pedidos activos
      */
+    @Transactional
     public void eliminar(Long id) {
         if (!userRepository.existsById(id)) {
             throw new ResourceNotFoundException("Usuario no encontrado con ID: " + id + " para eliminar");
         }
+
+        // 🔥 Validar que el mesero no tenga pedidos activos
+        try {
+            List<PedidoDTO> pedidos = pedidoFeignClient.obtenerPedidosPorMesero(id);
+            if (pedidos != null && !pedidos.isEmpty()) {
+                throw new BadRequestException(
+                    "No se puede eliminar el mesero con ID: " + id + 
+                    " porque tiene " + pedidos.size() + " pedido(s) asociado(s)");
+            }
+        } catch (BadRequestException e) {
+            throw e; // Re-lanzar la excepción de validación
+        } catch (Exception e) {
+            // Si falla la consulta a order-service, permitir la eliminación
+            System.err.println("Error al consultar pedidos con order-service: " + e.getMessage());
+        }
+
         userRepository.deleteById(id);
     }
     
@@ -119,6 +145,7 @@ public class UserService {
      * - Cambiar password (se encripta)
      * - Cambiar roles
      */
+    @Transactional
     public UserResponseDTO actualizarUsuario(Long id, UserUpdateDTO dto) {
 
         User usuario = userRepository.findById(id)

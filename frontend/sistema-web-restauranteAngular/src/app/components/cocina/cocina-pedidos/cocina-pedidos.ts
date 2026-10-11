@@ -35,11 +35,11 @@ export class CocinaPedidosComponent implements OnInit {
 
   ) {}
 
-ngOnInit() {
-  this.cargarPedidos();   // 🔥 SOLO UNA CARGA
+  ngOnInit() {
+    this.cargarPedidos();   // 🔥 SOLO UNA CARGA
 
-  this.iniciarPolling();  // luego polling
-}
+    this.iniciarPolling();  // luego polling
+  }
 
   ngOnDestroy() {
     this.destroy$.next();
@@ -76,7 +76,7 @@ aplicarFiltro() {
 
   if (estado === 'TODOS') {
     this.pedidos = this.allPedidos.filter(p => {
-      const est = this.normalizarEstado(p.estado?.nombre);
+      const est = this.normalizarEstado(p.estadoNombre);
       return est !== 'LISTO' && est !== 'PAGADO' && est !== 'ANULADO';
     });
 
@@ -87,7 +87,7 @@ aplicarFiltro() {
 
 
   this.pedidos = this.allPedidos.filter(p =>
-    this.normalizarEstado(p.estado?.nombre) === estado
+    this.normalizarEstado(p.estadoNombre) === estado
   );
 
   // 🔥 SOLO mostrar una vez
@@ -146,7 +146,7 @@ this.pedidoService.listar()
   getColor(estado: string) {
     switch (estado) {
       case 'PENDIENTE': return 'bg-warning';
-      case 'EN_COCINA': return 'bg-primary';
+      case 'EN_PROCESO': return 'bg-primary';
       case 'LISTO': return 'bg-success';
       default: return 'bg-secondary';
     }

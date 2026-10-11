@@ -1,6 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
+import { API_ROUTES } from "../config/api.config";
 
 import {ComprobanteResponse,DetalleComprobante, Comprobante } from "../models/comprobante.model";
 import { ComprobanteRequest } from "../models/comprobante.request.model";
@@ -8,8 +9,7 @@ import { ComprobanteRequest } from "../models/comprobante.request.model";
 @Injectable({ providedIn: 'root' })
 export class CajaService {
 
-  // 🔥 base única (NO duplicar URLs)
-  private api = 'http://localhost:8081/api/comprobantes';
+  private api = API_ROUTES.COMPROBANTES;
 
   constructor(private http: HttpClient) {}
 
