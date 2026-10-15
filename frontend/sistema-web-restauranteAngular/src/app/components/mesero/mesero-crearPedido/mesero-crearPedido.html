@@ -66,7 +66,8 @@
 
           <div>
             <strong>{{ c.nombre }}</strong><br>
-            <small>S/. {{ c.precioUni }}</small>
+<!-- 💡 Precio con decimales en el modal -->
+              <small>S/. {{ c.precioUni | number:'1.2-2' }}</small>
           </div>
 
           <button class="btn btn-sm btn-primary"
@@ -117,9 +118,11 @@
          (change)="actualizarCantidad(item)">
 </td>
 
-        <td>{{ item.comida.precioUni }}</td>
+<!-- 💡 Precio unitario con decimales -->
+        <td>S/. {{ item.comida.precioUni | number:'1.2-2' }}</td>
 
-        <td>{{ item.comida.precioUni * item.cantidad }}</td>
+        <!-- 💡 Subtotal con decimales -->
+        <td>S/. {{ (item.comida.precioUni * item.cantidad) | number:'1.2-2' }}</td>
 
         <td>
           <button class="btn btn-sm btn-danger"
@@ -130,7 +133,7 @@
   </table>
 
   <!-- 💰 TOTAL -->
-  <h4>Total: S/. {{ total }}</h4>
+  <h4>Total: S/. {{ total | number:'1.2-2' }}</h4>
 
   <div class="mb-3 mt-3">
   <label>Observaciones</label>

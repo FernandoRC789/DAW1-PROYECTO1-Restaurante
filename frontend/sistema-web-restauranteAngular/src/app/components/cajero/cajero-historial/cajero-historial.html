@@ -45,7 +45,8 @@
   <tbody>
     <tr *ngFor="let c of comprobantes">
       <td>{{ c.numero }}</td>
-      <td>{{ c.cliente?.nombre || 'Sin cliente' }}</td>
+<!-- 👤 Nombre del cliente (Protegido por si viene como objeto o como propiedad directa) -->
+      <td>{{ c.clienteNombre || c.cliente?.nombre || 'Sin cliente' }}</td>
       <td>{{ c.total }}</td>
       <td>{{ c.metodoPago }}</td>
       <td>{{ c.fechaEmision | date:'dd/MM/yyyy HH:mm' }}</td>
