@@ -25,8 +25,12 @@ import com.cibertec.billing_service.model.ComprobanteDePago;
 import com.cibertec.billing_service.model.EstadoComprobante;
 import com.cibertec.billing_service.repository.ComprobanteDePagoRepository;
 import com.cibertec.billing_service.repository.EstadoComprobanteRepository;
+import com.cibertec.billing_service.config.RabbitMQConfig;
+import com.cibertec.billing_service.event.ComprobanteAnuladoEvento;
+import com.cibertec.billing_service.event.ComprobanteEmitidoEvento;
 import com.cibertec.billing_service.utilsEnum.MetodoPago;
 import com.cibertec.billing_service.utilsEnum.TipoComprobante;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 /**
  * 📌 SERVICIO: ComprobantePagoService
@@ -57,6 +61,9 @@ public class ComprobantePagoService {
 
     @Autowired
     private CatalogoFeignClient catalogoFeignClient;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * 🔥 PROCESO PRINCIPAL: GENERAR COMPROBANTE
@@ -92,6 +99,22 @@ public class ComprobantePagoService {
         comp.setUserID(userId);
 
         ComprobanteDePago comprobanteGuardado = comprobanteRepo.save(comp);
+
+        // 📩 Publicar evento de comprobante emitido a RabbitMQ
+        try {
+            ComprobanteEmitidoEvento evento = new ComprobanteEmitidoEvento();
+            evento.setIdComprobante(comprobanteGuardado.getIdComprobantePago());
+            evento.setOrderId(comprobanteGuardado.getOrderId());
+            evento.setClienteId(comprobanteGuardado.getCliente());
+            evento.setTotal(comprobanteGuardado.getTotal());
+            evento.setTipoComprobante(comprobanteGuardado.getTipoComprobante() != null ? comprobanteGuardado.getTipoComprobante().name() : null);
+            evento.setMetodoPago(comprobanteGuardado.getMetodoPago() != null ? comprobanteGuardado.getMetodoPago().name() : null);
+            evento.setNumero(comprobanteGuardado.getNumero());
+            evento.setFechaEmision(comprobanteGuardado.getFechaEmision());
+            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.ROUTING_KEY_COMPROBANTE_EMITIDO, evento);
+        } catch (Exception e) {
+            System.err.println("⚠️ No se pudo publicar evento comprobante.emitido: " + e.getMessage());
+        }
 
         /*
          * 🔥 LIBERAR MESA DESDE OPERATIONS-SERVICE
@@ -331,6 +354,18 @@ public class ComprobantePagoService {
         comp.setEstado(estado);
         comp.setFechaAnulacion(LocalDateTime.now());
 
+        // 📩 Publicar evento de comprobante anulado a RabbitMQ
+        try {
+            ComprobanteAnuladoEvento evento = new ComprobanteAnuladoEvento();
+            evento.setIdComprobante(comp.getIdComprobantePago());
+            evento.setOrderId(comp.getOrderId());
+            evento.setMotivo("Comprobante anulado por usuario");
+            evento.setFechaAnulacion(comp.getFechaAnulacion());
+            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.ROUTING_KEY_COMPROBANTE_ANULADO, evento);
+        } catch (Exception e) {
+            System.err.println("⚠️ No se pudo publicar evento comprobante.anulado: " + e.getMessage());
+        }
+
         return comprobanteRepo.save(comp);
     }
 
@@ -372,6 +407,26 @@ public class ComprobantePagoService {
         dto.setTotal(c.getTotal());
         dto.setMetodoPago(c.getMetodoPago() != null ? c.getMetodoPago().name() : null);
         dto.setTipoComprobante(c.getTipoComprobante() != null ? c.getTipoComprobante().name() : null);
+
+     // 🔥 Agrega esta asignación para que el estado viaje en el JSON
+        dto.setEstado(c.getEstado());
+
+        // 👤 Consultar y asignar el nombre del cliente mediante Feign Client
+        if (c.getCliente() != null) {
+            try {
+                ClienteDTO clienteDTO = clienteRestConsumer.obtenerClientePorId(c.getCliente());
+                if (clienteDTO != null) {
+                    dto.setClienteNombre(clienteDTO.getNombre());
+                    dto.setClienteDocumento(clienteDTO.getDocumento());
+                } else {
+                    dto.setClienteNombre("Sin cliente");
+                }
+            } catch (Exception e) {
+                dto.setClienteNombre("Sin cliente");
+            }
+        } else {
+            dto.setClienteNombre("Sin cliente");
+        }
 
         return dto;
     }

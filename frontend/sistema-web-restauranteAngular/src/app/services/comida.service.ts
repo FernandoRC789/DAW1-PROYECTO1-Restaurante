@@ -38,7 +38,7 @@ export class ComidaService {
 
   // ➕ CREAR
   crear(data: Comida): Observable<Comida> {
-    return this.http.post<Comida>(`${this.apiUrl}/nuevo`, data);
+    return this.http.post<Comida>(`${this.apiUrl}`, data);
   }
 
   // ✏️ ACTUALIZAR

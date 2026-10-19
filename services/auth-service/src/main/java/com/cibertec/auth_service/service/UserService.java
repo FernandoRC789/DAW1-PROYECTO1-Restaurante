@@ -11,16 +11,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cibertec.auth_service.client.PedidoFeignClient;
+import com.cibertec.auth_service.config.RabbitMQConfig;
 import com.cibertec.auth_service.dto.PedidoDTO;
 import com.cibertec.auth_service.dto.UserCreateDTO;
 import com.cibertec.auth_service.dto.UserResponseDTO;
 import com.cibertec.auth_service.dto.UserUpdateDTO;
 import com.cibertec.auth_service.entity.Role;
 import com.cibertec.auth_service.entity.User;
+import com.cibertec.auth_service.event.UsuarioActualizadoEvento;
+import com.cibertec.auth_service.event.UsuarioCreadoEvento;
+import com.cibertec.auth_service.event.UsuarioEliminadoEvento;
 import com.cibertec.auth_service.exception.BadRequestException;
 import com.cibertec.auth_service.exception.ResourceNotFoundException;
 import com.cibertec.auth_service.repository.RoleRepository;
 import com.cibertec.auth_service.repository.UserRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 /**
  * 📌 SERVICE: UserService
@@ -41,6 +46,9 @@ public class UserService {
 
     @Autowired
     private PedidoFeignClient pedidoFeignClient;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
     
     /**
      * 🔄 Método privado para mapear de Entidad User a UserResponseDTO (Clean Code)
@@ -104,7 +112,20 @@ public class UserService {
 
         usuario.setRoles(roles);
         User savedUser = userRepository.save(usuario);
-        
+
+        // 📩 Publicar evento de usuario creado a RabbitMQ
+        try {
+            UsuarioCreadoEvento evento = new UsuarioCreadoEvento();
+            evento.setIdUsuario(savedUser.getIdUser());
+            evento.setUsername(savedUser.getUsername());
+            evento.setRoles(savedUser.getRoles().stream()
+                    .map(Role::getNombre)
+                    .toList());
+            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.ROUTING_KEY_USUARIO_CREADO, evento);
+        } catch (Exception e) {
+            System.err.println("⚠️ No se pudo publicar evento usuario.creado: " + e.getMessage());
+        }
+
         return mapToResponseDTO(savedUser);
     }
 
@@ -115,9 +136,9 @@ public class UserService {
      */
     @Transactional
     public void eliminar(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Usuario no encontrado con ID: " + id + " para eliminar");
-        }
+        User usuario = userRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + id + " para eliminar"));
+        String usernameABorrar = usuario.getUsername();
 
         // 🔥 Validar que el mesero no tenga pedidos activos
         try {
@@ -135,6 +156,16 @@ public class UserService {
         }
 
         userRepository.deleteById(id);
+
+        // 📩 Publicar evento de usuario eliminado a RabbitMQ
+        try {
+            UsuarioEliminadoEvento evento = new UsuarioEliminadoEvento();
+            evento.setIdUsuario(id);
+            evento.setUsername(usernameABorrar);
+            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.ROUTING_KEY_USUARIO_ELIMINADO, evento);
+        } catch (Exception e) {
+            System.err.println("⚠️ No se pudo publicar evento usuario.eliminado: " + e.getMessage());
+        }
     }
     
     /**
@@ -176,7 +207,22 @@ public class UserService {
         }
 
         User updatedUser = userRepository.save(usuario);
-        return mapToResponseDTO(updatedUser);    }
+
+        // 📩 Publicar evento de usuario actualizado a RabbitMQ
+        try {
+            UsuarioActualizadoEvento evento = new UsuarioActualizadoEvento();
+            evento.setIdUsuario(updatedUser.getIdUser());
+            evento.setUsername(updatedUser.getUsername());
+            evento.setRoles(updatedUser.getRoles().stream()
+                    .map(Role::getNombre)
+                    .toList());
+            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.ROUTING_KEY_USUARIO_ACTUALIZADO, evento);
+        } catch (Exception e) {
+            System.err.println("⚠️ No se pudo publicar evento usuario.actualizado: " + e.getMessage());
+        }
+
+        return mapToResponseDTO(updatedUser);
+    }
     
     public List<UserResponseDTO> buscarPorUsername(String username) {
         return userRepository.findByUsernameContainingIgnoreCase(username).stream()

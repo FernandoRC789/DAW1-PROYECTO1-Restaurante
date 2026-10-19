@@ -12,7 +12,11 @@ import com.cibertec.order_service.client.ClienteFeignClient;
 import com.cibertec.order_service.client.ComidaFeignClient;
 import com.cibertec.order_service.client.MesaFeignClient;
 import com.cibertec.order_service.client.UsuarioFeignClient;
+import com.cibertec.order_service.config.RabbitMQConfig;
 import com.cibertec.order_service.dto.ClienteDTO;
+import com.cibertec.order_service.event.PedidoCreadoEvento;
+import com.cibertec.order_service.event.PedidoEstadoCambiadoEvento;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import com.cibertec.order_service.dto.DetallePedidoRequestDTO;
 import com.cibertec.order_service.dto.DetallePedidoResponseDTO;
 import com.cibertec.order_service.dto.PedidoRequestDTO;
@@ -33,6 +37,9 @@ public class PedidoService {
     private UsuarioFeignClient usuarioFeignClient;
     @Autowired
     private ClienteFeignClient clienteFeignClient;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * Guarda un pedido directo (no recomendado si usas DTO)
@@ -218,7 +225,21 @@ public class PedidoService {
 
         // 5. GUARDAR EN BASE DE DATOS
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
-        
+
+        // 📩 5.1 Publicar evento de pedido creado a RabbitMQ (desacopla efectos secundarios)
+        try {
+            PedidoCreadoEvento evento = new PedidoCreadoEvento();
+            evento.setIdPedido(pedidoGuardado.getIdPedido());
+            evento.setMesaId(pedidoGuardado.getMesaId());
+            evento.setMeseroId(pedidoGuardado.getMeseroId());
+            evento.setClienteId(pedidoGuardado.getClienteId());
+            evento.setTotal(pedidoGuardado.getTotal());
+            evento.setEstado(pedidoGuardado.getEstadoId() != null ? pedidoGuardado.getEstadoId().toString() : null);
+            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.ROUTING_KEY_PEDIDO_CREADO, evento);
+        } catch (Exception e) {
+            System.err.println("⚠️ No se pudo publicar evento pedido.creado: " + e.getMessage());
+        }
+
         // 6. ACTUALIZAR ESTADO DE MESA A OCUPADO
         try {
             mesaFeignClient.actualizarEstadoMesa(dto.getMesaId(), "OCUPADO");
@@ -240,8 +261,21 @@ public class PedidoService {
         Pedido pedido = pedidoRepository.findById(idPedido)
             .orElseThrow(() -> new IllegalArgumentException("Pedido no encontrado con ID: " + idPedido));
 
+        Long estadoAnterior = pedido.getEstadoId();
         pedido.setEstadoId(estadoId);
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
+
+        // 📩 Publicar evento de cambio de estado a RabbitMQ
+        try {
+            PedidoEstadoCambiadoEvento evento = new PedidoEstadoCambiadoEvento();
+            evento.setIdPedido(pedidoGuardado.getIdPedido());
+            evento.setMesaId(pedidoGuardado.getMesaId());
+            evento.setEstadoIdAnterior(estadoAnterior);
+            evento.setEstadoIdNuevo(estadoId);
+            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.ROUTING_KEY_ESTADO_CAMBIADO, evento);
+        } catch (Exception e) {
+            System.err.println("⚠️ No se pudo publicar evento pedido.estado.cambiado: " + e.getMessage());
+        }
 
         // SI EL ESTADO ES PAGADO, LIBERAR LA MESA
         if (estadoId == 4L) {
