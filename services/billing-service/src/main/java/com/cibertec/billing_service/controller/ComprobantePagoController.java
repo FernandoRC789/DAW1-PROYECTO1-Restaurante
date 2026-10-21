@@ -1,6 +1,7 @@
 package com.cibertec.billing_service.controller;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,13 +14,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Valid;
-
 import com.cibertec.billing_service.dto.CierreCajaDTO;
 import com.cibertec.billing_service.dto.ComprobanteDTO;
 import com.cibertec.billing_service.dto.ComprobanteResponseDTO;
+import com.cibertec.billing_service.model.ComprobanteDePago;
 import com.cibertec.billing_service.service.ComprobantePagoService;
 import com.cibertec.billing_service.utilsEnum.MetodoPago;
+
+import jakarta.validation.Valid;
 
 /**
  * CONTROLADOR: ComprobantePagoController
@@ -39,7 +41,12 @@ public class ComprobantePagoController {
      */
     @GetMapping
     public ResponseEntity<?> listar() {
-        return ResponseEntity.ok(comprobanteService.listar());
+        List<ComprobanteDePago> lista = comprobanteService.listar();
+        // Debe mapearlas usando el método convertir para que lleven el clienteNombre
+        List<ComprobanteResponseDTO> listaDTO = lista.stream()
+                .map(c -> comprobanteService.convertir(c))
+                .toList();
+        return ResponseEntity.ok(listaDTO);
     }
 
     /**

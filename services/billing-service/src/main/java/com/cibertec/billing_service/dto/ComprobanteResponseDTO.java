@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.cibertec.billing_service.model.EstadoComprobante;
+
 public class ComprobanteResponseDTO {
     private String numero;
     private LocalDateTime fechaEmision;
@@ -15,6 +17,9 @@ public class ComprobanteResponseDTO {
     private String clienteDocumento;
 
     private List<DetalleComprobanteDTO> detalles;
+    
+ // 🔥 Agrega este campo para el estado (puedes usar un objeto simple o un Map/DTO, o un objeto EstadoComprobante si ya lo tienes)
+    private EstadoComprobante estado; // O EstadoComprobante si manejas la entidad directamente
 
 	public String getNumero() {
 		return numero;
@@ -80,8 +85,18 @@ public class ComprobanteResponseDTO {
 		this.detalles = detalles;
 	}
 
+	public EstadoComprobante getEstado() {
+		return estado;
+	}
+
+	public void setEstado(EstadoComprobante estado) {
+		this.estado = estado;
+	}
+
 	public ComprobanteResponseDTO(String numero, LocalDateTime fechaEmision, String tipoComprobante, String metodoPago,
-			BigDecimal total, String clienteNombre, String clienteDocumento, List<DetalleComprobanteDTO> detalles) {
+			BigDecimal total, String clienteNombre, String clienteDocumento, List<DetalleComprobanteDTO> detalles,
+			EstadoComprobante estado) {
+		super();
 		this.numero = numero;
 		this.fechaEmision = fechaEmision;
 		this.tipoComprobante = tipoComprobante;
@@ -90,6 +105,7 @@ public class ComprobanteResponseDTO {
 		this.clienteNombre = clienteNombre;
 		this.clienteDocumento = clienteDocumento;
 		this.detalles = detalles;
+		this.estado = estado;
 	}
 
 	public ComprobanteResponseDTO() {
