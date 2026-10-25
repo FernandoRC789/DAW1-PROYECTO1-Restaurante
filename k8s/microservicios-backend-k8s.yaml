@@ -1,0 +1,215 @@
+# ==========================================
+# 1. AUTH SERVICE
+# ==========================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+      - name: auth-service
+        image: auth-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8082 # (o el puerto interno de tu auth)
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+spec:
+  ports:
+  - port: 8082
+    targetPort: 8082
+  selector:
+    app: auth-service
+
+---
+# ==========================================
+# 2. BILLING SERVICE (Facturación)
+# ==========================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: billing-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: billing-service
+  template:
+    metadata:
+      labels:
+        app: billing-service
+    spec:
+      containers:
+      - name: billing-service
+        image: billing-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8085
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: billing-service
+spec:
+  ports:
+  - port: 8085
+    targetPort: 8085
+  selector:
+    app: billing-service
+
+# (Puedes repetir este mismo bloque cambiando el nombre para catalog-service, order-service, operations-service y customer-service)
+---
+# ==========================================
+# 2. CATALOG SERVICE (Facturación)
+# ==========================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catalog-service
+  template:
+    metadata:
+      labels:
+        app: catalog-service
+    spec:
+      containers:
+      - name: catalog-service
+        image: catalog-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8083
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalog-service
+spec:
+  ports:
+  - port: 8083
+    targetPort: 8083
+  selector:
+    app: catalog-service
+
+---
+# ==========================================
+# 2. CUSTOMER SERVICE (Facturación)
+# ==========================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: customer-service
+  template:
+    metadata:
+      labels:
+        app: customer-service
+    spec:
+      containers:
+      - name: customer-service
+        image: customer-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8086
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: customer-service
+spec:
+  ports:
+  - port: 8086
+    targetPort: 8086
+  selector:
+    app: customer-service
+
+---
+# ==========================================
+# 2. OPERATIONS SERVICE (Facturación)
+# ==========================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: operations-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: operations-service
+  template:
+    metadata:
+      labels:
+        app: operations-service
+    spec:
+      containers:
+      - name: operations-service
+        image: operations-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8087
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: operations-service
+spec:
+  ports:
+  - port: 8087
+    targetPort: 8087
+  selector:
+    app: operations-service
+
+---
+# ==========================================
+# 2. ORDER SERVICE (Facturación)
+# ==========================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+      - name: order-service
+        image: order-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8084
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+spec:
+  ports:
+  - port: 8084
+    targetPort: 8084
+  selector:
+    app: order-service

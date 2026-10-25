@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 
 /**
- * Filtro de validación JWT para el API Gateway
+ * Filtro de validación JWT y CORS para el API Gateway
  * Valida el token JWT en todas las peticiones excepto login y registro
  */
 @Component
@@ -33,9 +33,7 @@ public class JwtValidationFilter implements GlobalFilter, Ordered {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtValidationFilter.class);
     
-    // La misma llave secreta exacta que usas en tu auth-service
     private final String jwtSecret = "cibertec_secret_key_jwt_authentication_microservices_2026_secure";
-    
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private SecretKey getSignKey() {
@@ -45,19 +43,28 @@ public class JwtValidationFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
+        ServerHttpResponse response = exchange.getResponse();
 
-        // Permitir solicitudes OPTIONS (Preflight de CORS del navegador) sin restricciones
+        // 1. INYECTAR CABECERAS CORS GLOBALES EN CADA RESPUESTA
+        HttpHeaders headers = response.getHeaders();
+        headers.add("Access-Control-Allow-Origin", "*"); // O puedes usar "http://localhost:30080"
+        headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
+        headers.add("Access-Control-Allow-Headers", "Authorization, Content-Type, x-requested-with");
+        headers.add("Access-Control-Allow-Credentials", "true");
+
+        // 2. Permitir solicitudes OPTIONS (Preflight de CORS del navegador) inmediatamente con OK
         if (request.getMethod().equals(HttpMethod.OPTIONS)) {
-            return chain.filter(exchange);
+            response.setStatusCode(HttpStatus.OK);
+            return response.setComplete();
         }
         
-        // Permitir que las rutas de login y registro pasen libremente sin token
+        // 3. Permitir que las rutas de login y registro pasen libremente sin token
         String path = request.getURI().getPath();
         if (path.contains("/api/auth/login") || path.contains("/api/auth/register")) {
             return chain.filter(exchange);
         }
 
-        // Verificar si la petición trae el encabezado de autorización
+        // 4. Verificar si la petición trae el encabezado de autorización
         if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
             return onError(exchange, "Falta el token de autorización", HttpStatus.UNAUTHORIZED);
         }
@@ -70,7 +77,6 @@ public class JwtValidationFilter implements GlobalFilter, Ordered {
         String token = authHeader.substring(7);
 
         try {
-            // VALIDACIÓN REAL DEL TOKEN usando la misma lógica de tu JwtUtils
             Jwts.parser()
                 .verifyWith(getSignKey())
                 .build()
@@ -81,7 +87,6 @@ public class JwtValidationFilter implements GlobalFilter, Ordered {
             return onError(exchange, "Token no válido o expirado: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
 
-        // Si el token es legítimo, la petición avanza hacia billing, operations o catalog
         return chain.filter(exchange);
     }
 
@@ -90,6 +95,11 @@ public class JwtValidationFilter implements GlobalFilter, Ordered {
         response.setStatusCode(httpStatus);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
         
+        // Asegurar CORS también en respuestas de error
+        response.getHeaders().add("Access-Control-Allow-Origin", "*");
+        response.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
+        response.getHeaders().add("Access-Control-Allow-Headers", "Authorization, Content-Type, x-requested-with");
+
         Map<String, Object> errorResponse = Map.of(
             "timestamp", java.time.LocalDateTime.now().toString(),
             "status", httpStatus.value(),

@@ -1,0 +1,59 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="pYTiCOpbtvB6Ndma7VdJ">
+    <mxGraphModel dx="1030" dy="562" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="4x6Bm7dCCVTIz4mmzBfc-3" edge="1" parent="1" source="4x6Bm7dCCVTIz4mmzBfc-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="4x6Bm7dCCVTIz4mmzBfc-2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4x6Bm7dCCVTIz4mmzBfc-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=19;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;b&gt;&lt;font style=&quot;font-size: 20px;&quot;&gt;CLIENTE / INTERESADO&lt;br&gt;&lt;/font&gt;&lt;/b&gt;&lt;span style=&quot;color: rgb(234, 107, 102);&quot;&gt;Dueño del Restaurante&lt;/span&gt;" vertex="1">
+          <mxGeometry height="80" width="390" x="225" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="4x6Bm7dCCVTIz4mmzBfc-2" parent="1" style="whiteSpace=wrap;html=1;rounded=1;" value="" vertex="1">
+          <mxGeometry height="240" width="760" x="40" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="4x6Bm7dCCVTIz4mmzBfc-4" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=18;" value="Equipo Scrum" vertex="1">
+          <mxGeometry height="30" width="120" x="70" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="4x6Bm7dCCVTIz4mmzBfc-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=18;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Product Owner" vertex="1">
+          <mxGeometry height="60" width="155" x="70" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="4x6Bm7dCCVTIz4mmzBfc-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=18;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Scrum Master" vertex="1">
+          <mxGeometry height="60" width="165" x="350" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="4x6Bm7dCCVTIz4mmzBfc-9" edge="1" parent="1" source="4x6Bm7dCCVTIz4mmzBfc-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="4x6Bm7dCCVTIz4mmzBfc-8" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="685" y="330" />
+              <mxPoint x="130" y="330" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4x6Bm7dCCVTIz4mmzBfc-11" edge="1" parent="1" source="4x6Bm7dCCVTIz4mmzBfc-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="4x6Bm7dCCVTIz4mmzBfc-10" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="685" y="330" />
+              <mxPoint x="420" y="330" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4x6Bm7dCCVTIz4mmzBfc-13" edge="1" parent="1" source="4x6Bm7dCCVTIz4mmzBfc-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="4x6Bm7dCCVTIz4mmzBfc-12" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="4x6Bm7dCCVTIz4mmzBfc-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=18;fillColor=#d5e8d4;strokeColor=#82b366;" value="Equipo Desarrollo" vertex="1">
+          <mxGeometry height="60" width="140" x="615" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="4x6Bm7dCCVTIz4mmzBfc-8" parent="1" style="whiteSpace=wrap;html=1;fontSize=18;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;Backend&lt;/font&gt;&lt;/b&gt;&lt;div&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;Spring Boot/JAVA&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="180" x="70" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="4x6Bm7dCCVTIz4mmzBfc-10" parent="1" style="whiteSpace=wrap;html=1;fontSize=18;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;Frontend&lt;/font&gt;&lt;/b&gt;&lt;div&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;Angular&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="165" x="350" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="4x6Bm7dCCVTIz4mmzBfc-12" parent="1" style="whiteSpace=wrap;html=1;fontSize=18;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;font style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;BD y Pruebas&lt;/b&gt;&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;&quot; size=&quot;1&quot;&gt;MySQL - QA&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="155" x="625" y="350" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
