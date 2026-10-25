@@ -1,0 +1,137 @@
+version: '3.8'
+
+networks:
+  restaurant-net:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    external: true
+
+services:
+  # 1. Base de Datos MySQL
+  mysql-db:
+    image: mysql:8
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - restaurant-net
+
+  # 2. Servidor Eureka (Puerto estándar 8761)
+  eureka-server:
+    image: eureka-server:latest
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - restaurant-net
+
+  # 3. API Gateway (Puerto 8081 según tu tabla)
+  api-gateway:
+    image: api-gateway:latest
+    container_name: api-gateway
+    ports:
+      - "8081:8081"
+    networks:
+      - restaurant-net
+    depends_on:
+      - eureka-server
+
+  # 4. Auth Service (Puerto 8082)
+  auth-service:
+    image: auth-service:latest
+    container_name: auth-service
+    ports:
+      - "8082:8082"
+    networks:
+      - restaurant-net
+    depends_on:
+      - eureka-server
+      - mysql-db
+
+  # 5. Catalog Service (Puerto 8083)
+  catalog-service:
+    image: catalog-service:latest
+    container_name: catalog-service
+    ports:
+      - "8083:8083"
+    networks:
+      - restaurant-net
+    restart: on-failure
+    depends_on:
+      - eureka-server
+      - mysql-db
+
+  customer-service:
+        image: customer-service:latest
+        container_name: customer-service
+        ports:
+        - "8086:8086"
+        networks:
+        - restaurant-net
+        restart: on-failure
+        depends_on:
+        - eureka-server
+        - mysql-db
+
+  order-service:
+        image: order-service:latest
+        container_name: order-service
+        ports:
+        - "8084:8084"
+        networks:
+        - restaurant-net
+        restart: on-failure
+        depends_on:
+        - eureka-server
+        - mysql-db
+
+  # 7. Billing Service (Puerto 8085)
+  billing-service:
+    image: billing-service:latest
+    container_name: billing-service
+    ports:
+      - "8085:8085"
+    networks:
+      - restaurant-net
+    depends_on:
+      - eureka-server
+      - mysql-db
+
+  # 8. Customer Service (Puerto 8086)
+
+  # 9. Operations Service (Puerto 8087)
+  operations-service:
+    image: operations-service:latest
+    container_name: operations-service
+    ports:
+      - "8087:8087"
+    networks:
+      - restaurant-net
+    depends_on:
+      - eureka-server
+      - mysql-db
+
+  frontend:
+    image: frontend-app:latest
+    container_name: frontend-app
+    ports:
+      - "4200:80"
+    networks:
+      - restaurant-net
+    depends_on:
+      - api-gateway
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - restaurant-net # <--- Asegúrate de que use la misma red que tus microservicios
